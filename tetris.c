@@ -1,7 +1,6 @@
 /* 
- * autoTetris (v1.0)
- * by GloomyMouse (Chaofei XU)
- * Copyright (c) 2016
+ * autoTetris (v1.0.1)
+ * Copyright (c) 2016. GloomyMouse (Chaofei XU). All rights reserved.
  *
 **/
 #include <stdio.h>
@@ -246,12 +245,12 @@ int clearMapTmp()
 {
     int i, j;
     int heaptop = mapHeight + 1;
-    for (i = 0; i < mapHeight + 1; i++)
+    for (i = mapHeight; i >= 0; i--)
     {
         for (j = 0; j < mapWidth; j++)
         {
             maptmp[i][j] = map[i][j];
-            if (maptmp[i][j] == 2 && heaptop == mapHeight + 1)
+            if (maptmp[i][j] == 2 && heaptop > i)
                 heaptop = i;
         }
     }
@@ -480,7 +479,7 @@ int blankMoveAndRotate(struct Tetromino *tetro, int heaptop)
     int srs = tetro->srs;
     int i, j;
     int blank = 0;
-    for (i = heaptop; i < mapHeight; i++)
+    for (i = heaptop; i < mapHeight + 1; i++)
     {
         for (j = 0; j < mapWidth; j++)
         {
@@ -548,15 +547,12 @@ int scoreMoveAndRotate(struct Tetromino *tetro, int maptop_origin)
                     srs = tetro->srs;
                     mapleft_ret = mapleft;
                 }
-                else if (blank_min == blank)
+                land = maptop - 1 + tetro->buttom[tetro->srs] - tetro->top[tetro->srs];
+                if (land_max < land)
                 {
-                    land = maptop - 1 + tetro->buttom[tetro->srs] - tetro->top[tetro->srs];
-                    if (land_max < land)
-                    {
-                        land_max = land;
-                        srs = tetro->srs;
-                        mapleft_ret = mapleft;
-                    }
+                    land_max = land;
+                    srs = tetro->srs;
+                    mapleft_ret = mapleft;
                 }
             }
         }
