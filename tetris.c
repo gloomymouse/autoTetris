@@ -1,5 +1,5 @@
 /* 
- * autoTetris (v1.)
+ * autoTetris (v1.1.0)
  * Copyright (c) 2016. GloomyMouse (Chaofei XU). All rights reserved.
  *
 **/
