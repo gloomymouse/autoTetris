@@ -1,5 +1,5 @@
 /* 
- * autoTetris (v1.1.0)
+ * autoTetris (v1.)
  * Copyright (c) 2016. GloomyMouse (Chaofei XU). All rights reserved.
  *
 **/
@@ -285,6 +285,9 @@ void drawMap(int score)
                 case Bound:
                     putchar('-');
                     break;
+                case NextSquare:
+                    putchar(' ');
+                    break;
             }
         }
         putchar('|');
@@ -508,6 +511,66 @@ bool gameOver(struct Tetromino *tetro, int mapleft)
         return false;
 }
 
+
+void clearNext()
+{
+    int i, j;
+    for (i = mapHeight; i >= 0; i--)
+    {
+        for (j = 0; j < mapWidth; j++)
+        {
+            if (maptmp[i][j] == 4)
+                maptmp[i][j] = 0;
+        }
+    }
+}
+
+int scoreNext(struct Tetromino *next, int maptop_origin)
+{
+    struct Tetromino *tetro = next;
+    int maptop;
+    int mapleft;
+    int score;
+    int score_max = 0;
+    int i, j;
+    for (tetro->srs = 0; tetro->srs < 4; tetro->srs++)
+    {    
+        for (mapleft = 0; mapleft < mapWidth; mapleft++)
+        {
+            clearNext();
+            if (!determineBound(tetro, mapleft))
+                break;
+            if (tmpCrash(tetro, mapleft, 0))
+                continue;
+            maptop = maptop_origin;
+            while (maptop < mapHeight)
+            {
+                reMapTmp(tetro, mapleft, maptop);
+                maptop++;
+                if (tmpCrash(tetro, mapleft, maptop))
+                {
+                    break;
+                }
+            }
+            for (i = 0; i < mapHeight; i++)
+            {
+                for (j = 0; j < mapWidth; j++)
+                {
+                    if (maptmp[i][j] == 1)
+                        maptmp[i][j] = 4;
+                }
+            }
+            score = getTmpScore();
+            if (score_max < score)
+            {
+                score_max = score;
+            }
+        }
+    }
+    clearNext();
+    return score_max;
+}
+
 int blankMoveAndRotate(struct Tetromino *tetro, int heaptop)
 {
     int srs = tetro->srs;
@@ -596,65 +659,6 @@ int scoreMoveAndRotate(struct Tetromino *tetro, struct Tetromino *next, int mapt
     return mapleft_ret;
 }
 
-void clearNext()
-{
-    int i, j;
-    int heaptop = mapHeight + 1;
-    for (i = mapHeight; i >= 0; i--)
-    {
-        for (j = 0; j < mapWidth; j++)
-        {
-            if (maptmp[i][j] == 4)
-                maptmp[i][j] = 0;
-        }
-    }
-}
-
-int scoreNext(struct Tetromino *next, int maptop_origin)
-{
-    struct Tetromino tetro = next;
-    int maptop;
-    int mapleft;
-    int score;
-    int score_max = 0;
-    for (tetro->srs = 0; tetro->srs < 4; tetro->srs++)
-    {    
-        for (mapleft = 0; mapleft < mapWidth; mapleft++)
-        {
-            clearNext();
-            if (!determineBound(tetro, mapleft))
-                break;
-            if (tmpCrash(tetro, mapleft, 0))
-                continue;
-            maptop = maptop_origin;
-            while (maptop < mapHeight)
-            {
-                reMapTmp(tetro, mapleft, maptop);
-                maptop++;
-                if (tmpCrash(tetro, mapleft, maptop))
-                {
-                    break;
-                }
-            }
-            for (i = 0; i < mapHeight; i++)
-            {
-                for (j = 0; j < mapWidth; j++)
-                {
-                    if (maptmp[i][j] == 1)
-                        maptmp[i][j] = 4;
-                }
-            }
-            score = getTmpScore();
-            if (score_max < score)
-            {
-                score_max = score;
-                srs = tetro->srs;
-            }
-        }
-    }
-    return score_max;
-}
-
 int main()
 { 
     int i, j;
@@ -663,6 +667,7 @@ int main()
     //int heaptop = 0;
     system("clear");
     struct Tetromino tlist[7] = {ts, tz, tl, tj, ti, to, tt};
+    struct Tetromino nlist[7] = {ts, tz, tl, tj, ti, to, tt};
     struct Tetromino *tetro;
     struct Tetromino *next;
     srand((unsigned)time(NULL));
@@ -677,7 +682,7 @@ int main()
     {
         tetro = initTetro(tlist, ran);
         ran   = rand() % 7;
-        next  = initTetro(tlist, ran);
+        next  = initTetro(nlist, ran);
         drawNext(next);
         if (gameOver(tetro, mapleft))
         {
