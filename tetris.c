@@ -1,5 +1,5 @@
 /* 
- * autoTetris (v1.1.1)
+ * autoTetris (v1.1.2)
  * Copyright (c) 2016. GloomyMouse (Chaofei XU). All rights reserved.
  *
 **/
@@ -791,6 +791,7 @@ int scoreMoveAndRotate(struct Tetromino *tetro, struct Tetromino *next, int mapt
     int mapleft_ret = 0;
     int score;
     int scores[mapWidth * 4];
+    int scores_total[mapWidth * 4];
     int score_max = 0;
     int heaptop;
     int blank;
@@ -805,6 +806,7 @@ int scoreMoveAndRotate(struct Tetromino *tetro, struct Tetromino *next, int mapt
     int round_min = mapWidth * mapHeight;
     bool bounds[mapWidth * 4];
     bool rets[mapWidth * 4];
+    bool getret = false;
     int i, j;
     memset(scores, 0, sizeof(scores));
     memset(blanks, 0, sizeof(scores));
@@ -814,12 +816,6 @@ int scoreMoveAndRotate(struct Tetromino *tetro, struct Tetromino *next, int mapt
     memset(rets,   0, sizeof(bounds));
     for (tetro->srs = 0; tetro->srs < 4; tetro->srs++)
     {    
-        /*
-        memset(scores, 0, sizeof(scores));
-        memset(blanks, 0, sizeof(scores));
-        memset(lands,  0, sizeof(scores));
-        memset(rounds, 0, sizeof(rounds));
-        */
         srs_dec = tetro->srs * mapWidth;
         for (mapleft = 0; mapleft < mapWidth; mapleft++)
         {
@@ -856,95 +852,21 @@ int scoreMoveAndRotate(struct Tetromino *tetro, struct Tetromino *next, int mapt
                 }
             }
             score = getTmpScore();
-            score += scoreNext(next, maptop_origin);
             scores[mapleft+srs_dec] = score;
-            
-            /*
-            if (blank_min == mapWidth * mapHeight)
-            {
-                blank_min = blankMoveAndRotate(tetro, heaptop);
-                blanks[mapleft+srs_dec] = blank_min;
-            }
-            if (land_max == 0)
-            {
-                land_max = maptop - 1 + tetro->buttom[tetro->srs] - tetro->top[tetro->srs];
-                lands[mapleft+srs_dec] = land_max;
-            }
-            */
-            
+            score += scoreNext(next, maptop_origin);
+            scores_total[mapleft+srs_dec] = score;
+
             if (score_max < score)
-            {
                 score_max = score;
-                //srs = tetro->srs;
-                //mapleft_ret = mapleft;
-            }
-            //else if (score_max == score)
-            //{
-                /*
-                j = 0;
-                for (i = 0; i < mapWidth; i++)
-                {
-                    if (checkti_lefts[i] == 1)
-                        j++;
-                }
-                if (j != mapWidth)
-                {
-                    if ((tetro->id == 0 && (tetro->srs == 0 || tetro->srs == 2)) || 
-                        (tetro->id == 1 && (tetro->srs == 0 || tetro->srs == 2)) ||
-                        (tetro->id == 2 && tetro->srs == 0) ||
-                        (tetro->id == 3 && tetro->srs == 0) ||
-                        (tetro->id == 5) ||
-                        (tetro->id == 6 && tetro->srs == 0))
-                    {
-                        for (i = 0; i < mapWidth; i++)
-                        {
-                            if (checkti_lefts[i] == 1)
-                                checkti_left = i;
-                            else
-                                continue;
-                            if ((checkti_left + 1 >= mapleft + tetro->left[tetro->srs]) && 
-                                (checkti_left + 1 <= mapleft + tetro->right[tetro->srs]))
-                                goto mapleft_END;
-                        }
-                    }
-                }
-                */
-                /*
-                blank = blankMoveAndRotate(tetro, heaptop);
-                if (blank_min > blank)
-                {
-                    blanks[mapleft+srs_dec] = blank;
-                    blank_min = blank;
-                    srs = tetro->srs;
-                    mapleft_ret = mapleft;
-                }
-                land = maptop - 1 + tetro->buttom[tetro->srs] - tetro->top[tetro->srs];
-                if (land_max < land)
-                {
-                    lands[mapleft+srs_dec] = land;
-                    land_max = land;
-                    srs = tetro->srs;
-                    mapleft_ret = mapleft;
-                }
-                */
-            //}
-            //mapleft_END:;
+
             blank = blankMoveAndRotate(tetro, heaptop);
             blanks[mapleft+srs_dec] = blank;
             if (blank_min > blank)
-            {
                 blank_min = blank;
-                //srs = tetro->srs;
-                //mapleft_ret = mapleft;
-            }
             land = maptop - 1 + tetro->buttom[tetro->srs] - tetro->top[tetro->srs];
             lands[mapleft+srs_dec] = land;
             if (land_max < land)
-            {
                 land_max = land;
-                //srs = tetro->srs;
-                //mapleft_ret = mapleft;
-            }
         }
     }
     mapleft_ret = 0;
@@ -953,7 +875,7 @@ int scoreMoveAndRotate(struct Tetromino *tetro, struct Tetromino *next, int mapt
     {
         if (bounds[i])
             continue;
-        if (scores[i] == score_max) 
+        if (scores_total[i] == score_max) 
         {
             if (blanks[i] == blank_min && lands[i] == land_max)
                 rets[i] = 1;
@@ -971,10 +893,26 @@ int scoreMoveAndRotate(struct Tetromino *tetro, struct Tetromino *next, int mapt
         {
             mapleft_ret = i % mapWidth;
             srs = i / mapWidth;
+            getret = true;
             break;
         }
     }
-    if (mapleft_ret == 0 && srs == 0 && rets[0] == 0)
+    if (mapleft_ret == 0 && srs == 0 && getret == false && heaptop < mapHeight / 2)
+    {
+        for (i = 0; i < mapWidth * 4; i++)
+        {
+            if (bounds[i])
+                continue;
+            if (scores[i] > 0)
+            {
+                mapleft_ret = i % mapWidth;
+                srs = i / mapWidth;
+                getret = true;
+                break;
+            }
+        }
+    }
+    if (mapleft_ret == 0 && srs == 0 && getret == false)
     {
         for (i = 0; i < mapWidth * 4; i++)
         {
@@ -984,11 +922,12 @@ int scoreMoveAndRotate(struct Tetromino *tetro, struct Tetromino *next, int mapt
             {
                 mapleft_ret = i % mapWidth;
                 srs = i / mapWidth;
+                getret = true;
                 break;
             }
         }
     }
-    if (mapleft_ret == 0 && srs == 0 && rets[0] == 0)
+    if (mapleft_ret == 0 && srs == 0 && getret == false)
     {
         for (i = 0; i < mapWidth * 4; i++)
         {
@@ -998,11 +937,42 @@ int scoreMoveAndRotate(struct Tetromino *tetro, struct Tetromino *next, int mapt
             {
                 mapleft_ret = i % mapWidth;
                 srs = i / mapWidth;
+                getret = true;
                 break;
             }
         }
     }
-    if (mapleft_ret == 0 && srs == 0 && rets[0] == 0)
+    if (mapleft_ret == 0 && srs == 0 && getret == false)
+    {
+        for (i = 0; i < mapWidth * 4; i++)
+        {
+            if (bounds[i])
+                continue;
+            if (rets[i] == 2)
+            {
+                mapleft_ret = i % mapWidth;
+                srs = i / mapWidth;
+                getret = true;
+                break;
+            }
+        }
+    }
+    if (mapleft_ret == 0 && srs == 0 && getret == false)
+    {
+        for (i = 0; i < mapWidth * 4; i++)
+        {
+            if (bounds[i])
+                continue;
+            if (rets[i] == 3)
+            {
+                mapleft_ret = i % mapWidth;
+                srs = i / mapWidth;
+                getret = true;
+                break;
+            }
+        }
+    }
+    if (mapleft_ret == 0 && srs == 0 && getret == false)
     {
         for (i = 0; i < mapWidth * 4; i++)
         {
@@ -1012,12 +982,12 @@ int scoreMoveAndRotate(struct Tetromino *tetro, struct Tetromino *next, int mapt
             {
                 mapleft_ret = i % mapWidth;
                 srs = i / mapWidth;
+                getret = true;
                 break;
             }
         }
     }
     tetro->srs = srs;
-    //printf("@@@@@@@@@@@@@@@@@@@@@@@@@@@@ %d %d", mapleft_ret, bounds[mapleft_ret+tetro->srs*10]);
     return mapleft_ret;
 }
 
