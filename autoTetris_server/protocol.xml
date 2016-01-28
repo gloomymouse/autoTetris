@@ -1,0 +1,11 @@
+<!-- server send: -->
+<over></over>		<!-- 0/1 -->
+<crash></crash>
+<map></map> 		<!-- 0/1 -->
+<tetro></tetro>		<!-- ts/tz/tl/tj/ti/to/tt -->
+<next></next>		<!-- ts/tz/tl/tj/ti/to/tt -->
+
+<!-- server recv: -->
+<coor></coor>
+<srs></srs>
+<down></down>
