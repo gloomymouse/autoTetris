@@ -2,3 +2,5 @@
 Gist.ipynb
 .ipynb_checkpoints/Gist-checkpoint.ipynb
 __pycache__/
+/autoTetris_server/bak
+/autoTetris_server/test
