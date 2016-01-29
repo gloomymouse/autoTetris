@@ -1,3 +1,4 @@
 *.out
 Gist.ipynb
 .ipynb_checkpoints/Gist-checkpoint.ipynb
+__pycache__/
