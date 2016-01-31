@@ -1,5 +1,5 @@
 /*
- * autoTetris_server (v1.1.1)
+ * autoTetris_server (v1.1.2)
  * Copyright (c) 2016. GloomyMouse (Chaofei XU). All rights reserved.
  *
  */ 
@@ -22,6 +22,13 @@
 
 int main(int argc, char *argv[])
 {
+    if (argv[2] != NULL)
+        interval_coef = atoi(argv[2]);
+    if (interval_coef < 10)
+        interval_coef = 10;
+    else if (interval_coef > 10000)
+        interval_coef = 10000;
+
     int socket_fd;
     int accept_fd;
     int listen_port = atoi(argv[1]);

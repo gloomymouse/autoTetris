@@ -314,7 +314,7 @@ void autoTetrisServer(void *data)
 
     int tetro_index = 0;
     int next_index;
-    int interval = 100 * 1000;
+    int interval = interval_coef * 1000;
     int score = 0;
     int action = 0;
     bool down = false;
@@ -354,8 +354,8 @@ void autoTetrisServer(void *data)
 
         memset(send_msg, 0, MAX_BUFF);
         copyMap(map, send_buf);
-        sprintf(send_msg, "<tetro>%d</tetro><next>%d</next><map>%s</map>", 
-                tetro_index, next_index, send_buf);
+        sprintf(send_msg, "<tetro>%s</tetro><next>%s</next><map>%s</map>", 
+                tetro->name, next->name, send_buf);
         FD_ZERO(&wfds);   
         FD_SET(client_sockfd, &wfds);  
         time_out.tv_usec = 5;
