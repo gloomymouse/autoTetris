@@ -13,6 +13,7 @@
 #include <string.h>
 #include "vars.h"
 #include "tetris.h"
+#include "msg.h"
 
 void initMap(block map[mapHeight+1][mapWidth])
 {
@@ -49,11 +50,13 @@ struct Tetromino *initTetro(struct Tetromino *tlist, int num)
     return &tlist[num];
 }
 
-void drawMap(block map[mapHeight+1][mapWidth], int score)
+void drawMap(block map[mapHeight+1][mapWidth], int score, int uid)
 {
+    pthread_mutex_lock(&print_mutex);
     int i = 0, j = 0;
     for (i = 0; i < mapHeight + 1; i++)
     {
+        printf("\033[%dC", uid * 12);
         putchar('|');
         for (j = 0; j < mapWidth; j++)
         {
@@ -79,18 +82,63 @@ void drawMap(block map[mapHeight+1][mapWidth], int score)
         putchar('|');
         printf("\n");
     }
+    printf("\033[%dC", uid * 12);
     printf("Score: %d\n", score);
     printf("\033[0;0H");
     fflush(stdout);
+    pthread_mutex_unlock(&print_mutex);
 }
 
-void drawNext(struct Tetromino *next)
+/*
+void drawMap(block map[mapHeight+1][mapWidth], int score, int uid)
 {
+    pthread_mutex_lock(&print_mutex);
+    int i = 0, j = 0;
+    for (i = 0; i < mapHeight + 1; i++)
+    {
+        fprintf(stderr,"\033[%dC", uid * 13);
+        fputc('|',stderr);
+        for (j = 0; j < mapWidth; j++)
+        {
+            switch (map[i][j])
+            {
+                case Blank:
+                    fputc(' ',stderr);
+                    break;
+                case DynSquare:
+                    fputc('*',stderr);
+                    break;
+                case StatSquare:
+                    fputc('*',stderr);
+                    break;
+                case Bound:
+                    fputc('-',stderr);
+                    break;
+                default:
+                    fputc(' ',stderr);
+                    break;
+            }
+        }
+        fputc('|',stderr);
+        fprintf(stderr,"\n");
+    }
+    fprintf(stderr,"\033[%dC", uid * 13);
+    fprintf(stderr,"Score: %d\n", score);
+    fprintf(stderr,"\033[0;0H");
+    pthread_mutex_unlock(&print_mutex); 
+}
+*/
+
+void drawNext(struct Tetromino *next, int uid)
+{
+    pthread_mutex_lock(&print_mutex); 
     int i, j;
     printf("\033[23;0H");
+    printf("\033[%dC", uid * 12);
     printf("Next: ");
     for (i = next->top[0]; i < 3; i++)
     {
+        printf("\033[%dC", uid * 12);
         for (j = next->left[0]; j <= next->right[0]; j++)
         {
             switch (next->image[0][i][j])
@@ -104,10 +152,14 @@ void drawNext(struct Tetromino *next)
             }
         }
         if (i < 2)
-            printf("  \n      ");
+        {
+            printf("\033[%dC", uid * 12);
+            printf("  \n    ");
+        }
     }
     printf("\033[0;0H");
     fflush(stdout);
+    pthread_mutex_unlock(&print_mutex); 
 }
 
 bool determineCrash(block map[mapHeight+1][mapWidth], struct Tetromino *tetro, int mapleft, int maptop)
@@ -180,7 +232,7 @@ int clearLine(block map[mapHeight+1][mapWidth])
     return 0;
 }
 
-void reMap(block map[mapHeight+1][mapWidth], struct Tetromino *tetro, int mapleft, int maptop, int score)
+void reMap(block map[mapHeight+1][mapWidth], struct Tetromino *tetro, int mapleft, int maptop, int score, int uid)
 {
     int i, j;
     int left = tetro->left[tetro->srs];
@@ -202,74 +254,59 @@ void reMap(block map[mapHeight+1][mapWidth], struct Tetromino *tetro, int maplef
                 map[maptop+i][mapleft+j-left] = tetro->image[tetro->srs][i][j];
         }
     }
-    drawMap(map, score);
+    drawMap(map, score, uid);
 }
 
-void copyMap(block map[mapHeight+1][mapWidth], char *msg)
+void copyMap(block map[mapHeight+1][mapWidth], char *buf)
 {
     int i, j;
     int n = 0;
-    memset(msg, 0, MAX_BUFF);
+    memset(buf, 0, MAX_BUFF);
     for (i = 0; i < mapHeight; i++)
     {
         for (j = 0; j < mapWidth; j++)
         {
-            msg[n] = map[i][j] + 48;
+            buf[n] = map[i][j] + 48;
             n++;
         }
     }
-    msg[n] = '\0';
+    buf[n] = '\0';
 }
 
-bool gameOver(block map[mapHeight+1][mapWidth], struct Tetromino *tetro, int mapleft)
+bool gameOver(block map[mapHeight+1][mapWidth], struct Tetromino *tetro, int mapleft, int uid)
 {
     if (determineCrash(map, tetro, mapleft, 0))
+    {
+        pthread_mutex_lock(&print_mutex);
+        printf("\n\n");
+        printf("\033[%dC", uid * 12);
+        printf(" Game Over! \n");
+        printf("\033[0;0H");
+        fflush(stdout);
+        pthread_mutex_unlock(&print_mutex);
         return true;
+    }
     else
         return false;
-}
-
-void sendMsg(int client_sockfd, char *msg)
-{
-    char message[MAX_BUFF];
-    memset(message, 0, MAX_BUFF);
-    strcpy(message, msg);
-    if (send(client_sockfd, message, strlen(message), 0) < 0)
-    {
-        printf("Send message error\n");
-    }
-}
-
-void recvMsg(int client_sockfd, char *buffer)
-{
-    int recv_size;
-    memset(buffer, 0, MAX_BUFF);
-    if ((recv_size = recv(client_sockfd, buffer, MAX_BUFF, 0)) < 0)
-    {
-        printf("read() error");
-        perror("read() error");
-    }
-    else
-    {
-        printf("received message: %s\n", buffer);
-    }
 }
 
 void autoTetrisServer(void *data)
 { 
     pthread_detach(pthread_self());
     int client_sockfd = (int)data;
-    char msg[MAX_BUFF];
-    char buffer[MAX_BUFF];
-    while (!thread_begin){}
-
+    int uid = thread_num - 1;
+    char send_buf[MAX_BUFF];
+    char send_msg[MAX_BUFF];
+    char recv_buf[MAX_BUFF];
+    char recv_msg[MAX_BUFF * 4];
+    memset(recv_msg, 0, MAX_BUFF * 4);
     
     enum block map[mapHeight + 1][mapWidth] = {Blank};
     int i, j;
     int mapleft = 3;
     int maptop  = 0;
     int heaptop = 0;
-    system("clear");
+    
     struct Tetromino tlist[7] = {ts, tz, tl, tj, ti, to, tt};
     struct Tetromino nlist[7] = {ts, tz, tl, tj, ti, to, tt};
     struct Tetromino *tetro;
@@ -279,9 +316,21 @@ void autoTetrisServer(void *data)
     int next_index;
     int interval = 100 * 1000;
     int score = 0;
+    int action = 0;
+    bool down = false;
 
+    int ret;
+    fd_set rfds, wfds;  
+    struct timeval time_out = {0, 0};
+
+    while (!thread_begin)
+    {
+        usleep(100);
+    }
+
+    //system("clear");
     initMap(map);
-    drawMap(map, score);
+    drawMap(map, score, uid);
 
     while (1)
     {
@@ -290,40 +339,73 @@ void autoTetrisServer(void *data)
 
         tetro = initTetro(tlist, tetros[tetro_index]);
         next  = initTetro(nlist, tetros[next_index]);
-        drawNext(next);
+        //drawNext(next, uid);
         
-        if (gameOver(map, tetro, mapleft))
+        if (gameOver(map, tetro, mapleft, uid))
         {
-            strcpy(msg, "<over>over</over>");
-            sendMsg(client_sockfd, msg);
-            printf("\n\n Game Over! ");
+            memset(send_msg, 0, MAX_BUFF);
+            strcpy(send_msg, "<over>over</over>");
+            sendMsg(client_sockfd, send_msg);
             //getchar();
             break;
         }
 
-        sprintf(msg, "<tetro>%d</tetro><next>%d</next>", tetro_index, next_index);
-        sendMsg(client_sockfd, msg);
-        copyMap(map, buffer);
-        sprintf(msg, "<map>%s</map>", buffer);
+        memset(send_msg, 0, MAX_BUFF);
+        copyMap(map, send_buf);
+        sprintf(send_msg, "<tetro>%d</tetro><next>%d</next><map>%s</map>", 
+                tetro_index, next_index, send_buf);
+        FD_ZERO(&wfds);   
+        FD_SET(client_sockfd, &wfds);  
+        time_out.tv_usec = 5;
+        ret = select(client_sockfd+1, NULL, &wfds, NULL, &time_out);
+        if (ret < 0)
+        {
+            //printf("select() failed");
+            perror("select() failed");
+            exit(1);
+        }
+        else
+        {
+            if (FD_ISSET(client_sockfd, &wfds))
+            {
+                sendMsg(client_sockfd, send_msg);
+            }  
+        }
         tetros_num[tetro_index]++;
         tetro_index++;
 
         //heaptop = getHeapTop();
-
         while (maptop < mapHeight)
         {
-            //if (maptop == 0)
-                
-            //printf("%d ",mapleft);
-            //recvMsg(client_sockfd, buffer);
-            
-            reMap(map, tetro, mapleft, maptop, score);
+            FD_ZERO(&rfds);   
+            FD_SET(client_sockfd, &rfds);
+            time_out.tv_usec = 10;
+            ret = select(client_sockfd+1, &rfds, NULL, NULL, &time_out);
+            if (ret < 0)
+            {
+                //printf("select() failed");
+                perror("select() failed");
+                exit(1);
+            }
+            else    // ret == 0: time out
+            {
+                if (FD_ISSET(client_sockfd, &rfds))
+                {
+                    recvMsg(client_sockfd, recv_buf);
+                    strcat(recv_msg, recv_buf);
+                    //printf("=============== %s\n", recv_msg);
+                }
+            }
+            action = getAction(recv_msg);
+            changeAction(map, tetro, &mapleft, &down, action);
+            reMap(map, tetro, mapleft, maptop, score, uid);
             usleep(interval);
             maptop++;
             if (determineCrash(map, tetro, mapleft, maptop))
             {
-                strcpy(msg, "<crash>crash</crash>");
-                sendMsg(client_sockfd, msg);
+                memset(send_msg, 0, MAX_BUFF);
+                strcpy(send_msg, "<crash>crash</crash>");
+                sendMsg(client_sockfd, send_msg);
                 break;
             }
         }
@@ -336,7 +418,7 @@ void autoTetrisServer(void *data)
             }
         }
         score += clearLine(map);
-        drawMap(map, score);
+        drawMap(map, score, uid);
         maptop = 0;
     }
 

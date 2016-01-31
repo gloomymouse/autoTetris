@@ -4,6 +4,7 @@ int thread_num = 0;
 int tetros[MAX_BUFF] = {0};
 int tetros_num[MAX_BUFF] = {0};
 bool thread_begin = false;
+pthread_mutex_t print_mutex = PTHREAD_MUTEX_INITIALIZER;
 
 Tetromino ts = 
 {

@@ -6,6 +6,6 @@
 <next></next>		<!-- ts/tz/tl/tj/ti/to/tt -->
 
 <!-- server recv: -->
-<coor></coor>
-<srs></srs>
-<down></down>
+<coor></coor>       <!-- 0-9 -->
+<srs></srs>         <!-- 0-3 -->
+<down></down>       <!-- 0/1 -->

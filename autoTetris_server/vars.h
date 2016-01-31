@@ -1,6 +1,7 @@
 #ifndef _VAR_H_
 #define _VAR_H_
 
+#include <pthread.h>
 #include <netinet/in.h>
 
 #define bool int
@@ -17,6 +18,7 @@ extern int thread_num;
 extern int tetros[MAX_BUFF];
 extern int tetros_num[MAX_BUFF];
 extern bool thread_begin;
+extern pthread_mutex_t print_mutex;
 
 typedef enum block
 {

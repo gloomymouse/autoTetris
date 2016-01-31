@@ -1,5 +1,5 @@
 /*
- * autoTetris_server (v1.0.0)
+ * autoTetris_server (v1.1.0)
  * Copyright (c) 2016. GloomyMouse (Chaofei XU). All rights reserved.
  *
  */ 
@@ -18,6 +18,7 @@
 #include <string.h>
 #include "vars.h"
 #include "tetris.h"
+#include "msg.h"
 
 int main(int argc, char *argv[])
 {
@@ -164,8 +165,8 @@ int main(int argc, char *argv[])
         i++;
     }
 
+    system("clear");
     printf("Over!\n");
     close(socket_fd);
-
     return 0;
 } 
