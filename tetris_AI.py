@@ -118,7 +118,7 @@ def score(status):
         for block in status_T[column]:
             if flag is True and block is 0:
                 under_blocks[column] += 1
-            elif flag is False and block is 1:
+            elif flag is False and block is not 0:
                 flag = True
                 # calculate relative height, max height of blocks is 0
                 profile[column] = MAX_HEIGHT - status_T[column].index(block)
@@ -164,7 +164,7 @@ def profile_status(status):
     for column in range(0, len(status_T)):
         flag = False
         for block in status_T[column]:
-            if flag is False and block is 1:
+            if flag is False and block is not 0:
                 flag = True
                 # calculate relative height, max height of blocks is 0
                 profile[column] = MAX_HEIGHT - status_T[column].index(block)
