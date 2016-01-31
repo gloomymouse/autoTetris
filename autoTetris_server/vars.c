@@ -3,11 +3,14 @@
 int thread_num = 0; 
 int tetros[MAX_BUFF] = {0};
 int tetros_num[MAX_BUFF] = {0};
+int interval_coef = 100;
 bool thread_begin = false;
+pthread_mutex_t print_mutex = PTHREAD_MUTEX_INITIALIZER;
 
 Tetromino ts = 
 {
     .id     = 0,
+    .name   = "ts",
     .left   = {0, 1, 0, 0},
     .right  = {2, 2, 2, 1},
     .top    = {0, 0, 1, 0},
@@ -37,6 +40,7 @@ Tetromino ts =
 Tetromino tz =
 {
     .id     = 1,
+    .name   = "tz",
     .left   = {0, 1, 0, 0},
     .right  = {2, 2, 2, 1},
     .top    = {0, 0, 1, 0},
@@ -66,6 +70,7 @@ Tetromino tz =
 Tetromino tl = 
 {
     .id     = 2,
+    .name   = "tl",
     .left   = {0, 1, 0, 0},
     .right  = {2, 2, 2, 1},
     .top    = {0, 0, 1, 0},
@@ -95,6 +100,7 @@ Tetromino tl =
 Tetromino tj =
 {
     .id     = 3,
+    .name   = "tj",
     .left   = {0, 1, 0, 0},
     .right  = {2, 2, 2, 1},
     .top    = {0, 0, 1, 0},
@@ -124,6 +130,7 @@ Tetromino tj =
 Tetromino ti =
 {
     .id     = 4,
+    .name   = "ti",
     .left   = {0, 2, 0, 1},
     .right  = {3, 2, 3, 1},
     .top    = {1, 0, 2, 0},
@@ -153,6 +160,7 @@ Tetromino ti =
 Tetromino to = 
 {
     .id     = 5,
+    .name   = "to",
     .left   = {1, 1, 1, 1},
     .right  = {2, 2, 2, 2},
     .top    = {0, 0, 0, 0},
@@ -182,6 +190,7 @@ Tetromino to =
 Tetromino tt = 
 {
     .id     = 6,
+    .name   = "tt",
     .left   = {0, 1, 0, 0},
     .right  = {2, 2, 2, 1},
     .top    = {0, 0, 1, 0},

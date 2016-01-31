@@ -9,9 +9,9 @@ int getHeapTop(block[][mapWidth]);
 
 Tetromino *initTetro(Tetromino*, int);
 
-void drawMap(block[][mapWidth], int);
+void drawMap(block[][mapWidth], int, int);
 
-void drawNext(Tetromino*);
+void drawNext(Tetromino*, int);
 
 bool determineCrash(block[][mapWidth], Tetromino*, int, int);
 
@@ -19,15 +19,11 @@ bool determineBound(block[][mapWidth], Tetromino*, int);
 
 int clearLine(block[][mapWidth]);
 
-void reMap(block[][mapWidth], Tetromino*, int, int, int);
+void reMap(block[][mapWidth], Tetromino*, int, int, int, int);
 
 void copyMap(block[][mapWidth], char*);
 
-bool gameOver(block[][mapWidth], Tetromino*, int);
-
-void sendMsg(int, char*);
-
-void recvMsg(int, char*);
+bool gameOver(block[][mapWidth], Tetromino*, int, int);
 
 void autoTetrisServer(void*);
 
