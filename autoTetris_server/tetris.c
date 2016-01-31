@@ -340,6 +340,8 @@ void autoTetrisServer(void *data)
         tetro = initTetro(tlist, tetros[tetro_index]);
         next  = initTetro(nlist, tetros[next_index]);
         //drawNext(next, uid);
+        mapleft = 3;
+        down = false;
         
         if (gameOver(map, tetro, mapleft, uid))
         {
@@ -396,7 +398,7 @@ void autoTetrisServer(void *data)
                     //printf("=============== %s\n", recv_msg);
                 }
             }
-            action = getAction(recv_msg);
+            action = getAction(recv_msg, tetro, mapleft, down);
             changeAction(map, tetro, &mapleft, &down, action);
             reMap(map, tetro, mapleft, maptop, score, uid);
             usleep(interval);

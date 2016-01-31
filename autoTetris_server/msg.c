@@ -63,12 +63,12 @@ bool readXML(char *key, char* value, char *msg)
     return true;
 }
 
-int getAction(char *msg)
+int getAction(char *msg, struct Tetromino *tetro, int mapleft_origin, bool down_origin)
 {
     int num = 0;
-    int mapleft = 3;
-    int srs = 0;
-    bool down = false;
+    int mapleft = mapleft_origin;
+    int srs = tetro->srs;
+    bool down = down_origin;
     char key[MAX_BUFF];
     char value[MAX_BUFF];
     memset(key, 0, MAX_BUFF);

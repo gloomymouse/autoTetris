@@ -9,7 +9,7 @@ void recvMsg(int, char*);
 
 bool readXML(char*, char*, char*);
 
-int getAction(char*);
+int getAction(char*, Tetromino*, int, bool);
 
 void changeAction(block[][mapWidth], Tetromino*, int*, bool*, int);
 
