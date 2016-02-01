@@ -1,2 +1,11 @@
+*.out
+Gist.ipynb
+.ipynb_checkpoints/Gist-checkpoint.ipynb
+__pycache__/
 /autoTetris_server/bak
 /autoTetris_server/test
+/autoTetris_server/autoTetris
+/autoTetris_server/autoTetris
+/autoTetris_server/autoTetris.dSYM/
+*.o
+*.DS_Store
