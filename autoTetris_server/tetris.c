@@ -180,7 +180,7 @@ bool determineCrash(block map[mapHeight+1][mapWidth], struct Tetromino *tetro, i
     return false;
 }
 
-bool determineBound(block map[mapHeight+1][mapWidth], struct Tetromino *tetro, int mapleft)
+bool determineBound(struct Tetromino *tetro, int mapleft)
 {
     int srs   = tetro->srs;
     int left  = tetro->left[srs];
@@ -399,7 +399,7 @@ void autoTetrisServer(void *data)
                 }
             }
             action = getAction(recv_msg, tetro, mapleft, down);
-            changeAction(map, tetro, &mapleft, &down, action);
+            changeAction(tetro, &mapleft, &down, action);
             reMap(map, tetro, mapleft, maptop, score, uid);
             usleep(interval);
             maptop++;

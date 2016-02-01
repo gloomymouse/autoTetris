@@ -63,51 +63,71 @@ bool readXML(char *key, char* value, char *msg)
     return true;
 }
 
-int getAction(char *msg, struct Tetromino *tetro, int mapleft_origin, bool down_origin)
+void getMap(block map[][mapWidth], char *buf)
 {
-    int num = 0;
-    int mapleft = mapleft_origin;
-    int srs = tetro->srs;
-    bool down = down_origin;
+    int n = 0;
+    while (buf[n] != '\0')
+    {
+        map[n/mapWidth][n%mapWidth] = buf[n] - 48;
+        n++;
+    }
+}
+
+int getTetro(char *buf)
+{
+    if (strcmp(buf, "ts") == 0)
+        return 0;
+    else if (strcmp(buf, "tz") == 0)
+        return 1;
+    else if (strcmp(buf, "tl") == 0)
+        return 2;
+    else if (strcmp(buf, "tj") == 0)
+        return 3;
+    else if (strcmp(buf, "ti") == 0)
+        return 4;
+    else if (strcmp(buf, "to") == 0)
+        return 5;
+    else if (strcmp(buf, "tt") == 0)
+        return 6;
+    else
+    {
+        printf("getTetro() error\n");
+        perror("getTetro() error\n");
+        exit(1);
+    }
+}
+
+void getStatus(char *msg, block map[][mapWidth], int *tetro, int *next, bool *crash, bool *over)
+{
     char key[MAX_BUFF];
     char value[MAX_BUFF];
     memset(key, 0, MAX_BUFF);
     memset(value, 0, MAX_BUFF);
     while (readXML(key, value, msg))
     {
-        num = atoi(value);
-        if (strcmp(key, "coor") == 0)
+        if (strcmp(key, "over") == 0)
         {
-            if (num >= 0 && num <= 9)
-                mapleft = num;
+            if (strcmp(value, "over") == 0)
+                *over = 1;
         }
-        else if (strcmp(key, "srs") == 0)
+        else if (strcmp(key, "crash") == 0)
         {
-            if (num >= 0 && num <= 3)
-                srs = num;
+            if (strcmp(value, "crash") == 0)
+                *crash = 1;
         }
-        else if (strcmp(key, "down") == 0)
+        else if (strcmp(key, "map") == 0)
         {
-            if (num == 0 || num == 1)
-                down = num;
+            getMap(map, value);
+        }
+        else if (strcmp(key, "tetro") == 0)
+        {
+            *tetro = getTetro(value);
+        }
+        else if (strcmp(key, "next") == 0)
+        {
+            *next = getTetro(value);
         }
         memset(key, 0, MAX_BUFF);
         memset(value, 0, MAX_BUFF);
     }
-    return (mapleft * 100 + srs * 10 + down);
 }
-
-void changeAction(struct Tetromino *tetro, int *mapleft, bool *down, int action)
-{
-    *down = action % 10;
-    action /= 10;
-    tetro->srs = action % 10;
-    action /= 10;
-    *mapleft = action;
-
-    while (!determineBound(tetro, *mapleft))
-    {
-        (*mapleft)--;
-    }
-}
-

@@ -9,9 +9,11 @@ void recvMsg(int, char*);
 
 bool readXML(char*, char*, char*);
 
-int getAction(char*, Tetromino*, int, bool);
+void getMap(block[][mapWidth], char*);
 
-void changeAction(Tetromino*, int*, bool*, int);
+int getTetro(char*);
+
+void getStatus(char*, block[][mapWidth], int*, int*, bool*, bool*);
 
 #endif
 
