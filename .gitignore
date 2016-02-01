@@ -2,11 +2,9 @@
 Gist.ipynb
 .ipynb_checkpoints/Gist-checkpoint.ipynb
 __pycache__/
-/autoTetris/bak
-/autoTetris_client/bak
-/autoTetris_clinet/test
-/autoTetris_server/bak
-/autoTetris_server/test
+*.pyc
+bak/
+test/
 /autoTetris_server/autoTetris*
 /other
 *.o
