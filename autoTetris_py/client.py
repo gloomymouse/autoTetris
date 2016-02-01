@@ -3,11 +3,13 @@
 # client
 
 
+import sys
 import socket
 import re
 import tetris_AI
 
 
+PORT = int(sys.argv[1])
 MINO = re.compile('<tetro>.*?</tetro>')
 NEXT_MINO = re.compile('<next>.*?</next>')
 MAP_STATUS = re.compile('<map>.*?</map>')
@@ -15,7 +17,7 @@ MAP_STATUS = re.compile('<map>.*?</map>')
 
 def main():
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    s.connect(('localhost', 3333))
+    s.connect(('localhost', PORT))
 
     while True:
         data = s.recv(1024)
