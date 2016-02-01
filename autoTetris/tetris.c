@@ -3,10 +3,12 @@
  * Copyright (c) 2016. GloomyMouse (Chaofei XU). All rights reserved.
  *
 **/
+#include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <sys/types.h>
+#include <sys/time.h>
 #include <time.h>
 #include <string.h>
 
@@ -21,6 +23,8 @@ enum block{Blank = 0, DynSquare, StatSquare, Bound, NextSquare, TmpSquare};
 enum block map[mapHeight + 1][mapWidth] = {Blank};
 enum block maptmp[mapHeight + 1][mapWidth];
 enum block maptmpbak[mapHeight + 1][mapWidth];
+
+bool thread_cancel = false;
 
 struct Tetromino
 {
@@ -248,6 +252,21 @@ void initMap()
     }
     for (j = 0; j < mapWidth; j++)
         map[i][j] = Bound;
+}
+
+int getHeapTop()
+{
+    int i, j;
+    int heaptop = mapHeight + 1;
+    for (i = mapHeight; i >= 0; i--)
+    {
+        for (j = 0; j < mapWidth; j++)
+        {
+            if (map[i][j] == 2 && heaptop > i)
+                heaptop = i;
+        }
+    }
+    return heaptop;
 }
 
 int clearMapTmp()
@@ -991,12 +1010,19 @@ int scoreMoveAndRotate(struct Tetromino *tetro, struct Tetromino *next, int mapt
     return mapleft_ret;
 }
 
+struct AIArgs
+{
+    struct Tetromino *tetro;
+    struct Tetromino *next;
+    int maptop_origin; 
+};
+
 int main()
 { 
     int i, j;
     int mapleft = 3;
     int maptop  = 0;
-    //int heaptop = 0;
+    int heaptop = 0;
     system("clear");
     struct Tetromino tlist[7] = {ts, tz, tl, tj, ti, to, tt};
     struct Tetromino nlist[7] = {ts, tz, tl, tj, ti, to, tt};
@@ -1006,6 +1032,9 @@ int main()
     int ran = rand() % 7;
     int interval = 100000;
     int score = 0;
+    pthread_t pid;
+    struct AIArgs ai_args;
+
     initMap();
     drawMap(score);
 
@@ -1022,8 +1051,15 @@ int main()
             getchar();
             return 0;
         }
+        //heaptop = getHeapTop();
+        ai_args.tetro = tetro;
+        ai_args.next  = next;
+        ai_args.maptop_origin = maptop;
+        if (pthread_create(&pid, NULL, (void*)(&scoreMoveAndRotate), (void*)&ai_args) != 0)
+            printf("Pthread Fail\n");
         while (maptop < mapHeight)
         {
+            //if (maptop == 0 || maptop > heaptop)
             if (maptop == 0)
                 mapleft = scoreMoveAndRotate(tetro, next, maptop);
             //printf("%d ",mapleft);
