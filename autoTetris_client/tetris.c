@@ -213,6 +213,7 @@ void autoTetrisClient(void *data)
     //printf("pthread_create() succeed\n");
     //pthread_detach(pthread_self());
     int socket_fd = (int)data;
+    char *name = "G.M.";
     char send_buf[MAX_BUFF];
     char send_msg[MAX_BUFF];
     char recv_buf[MAX_BUFF];
@@ -240,6 +241,9 @@ void autoTetrisClient(void *data)
     bool crash = false;
     bool over = false;
 
+    memset(send_msg, 0, MAX_BUFF);
+    sprintf(send_msg, "<name>%s</name>", name);
+    sendMsg(socket_fd, send_msg);
     initMap(map);
     //drawMap(score);
     while (1)
