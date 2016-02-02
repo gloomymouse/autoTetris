@@ -18,7 +18,9 @@ extern int thread_num;
 extern int tetros[MAX_BUFF];
 extern int tetros_num[MAX_BUFF];
 extern int interval_coef;
+extern int scores[BACKLOG];
 extern bool thread_begin;
+extern char names[BACKLOG][12];
 extern pthread_mutex_t print_mutex;
 
 typedef enum block

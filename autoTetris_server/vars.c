@@ -4,7 +4,9 @@ int thread_num = 0;
 int tetros[MAX_BUFF] = {0};
 int tetros_num[MAX_BUFF] = {0};
 int interval_coef = 100;
+int scores[BACKLOG] = {0};
 bool thread_begin = false;
+char names[BACKLOG][12];
 pthread_mutex_t print_mutex = PTHREAD_MUTEX_INITIALIZER;
 
 Tetromino ts = 
