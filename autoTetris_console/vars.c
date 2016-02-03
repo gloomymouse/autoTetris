@@ -1,13 +1,10 @@
 #include "vars.h"
 
-int thread_num = 0; 
-int tetros[MAX_BUFF] = {0};
-int tetros_num[MAX_BUFF] = {0};
-int interval_coef = 100;
-int scores[BACKLOG] = {0};
-bool thread_begin = false;
-char names[BACKLOG][12];
-pthread_mutex_t print_mutex = PTHREAD_MUTEX_INITIALIZER;
+char recv_buf[MAX_BUFF];
+int crash = false;
+int over = false;
+int mapleft = 3;
+int srs = 0;
 
 Tetromino ts = 
 {

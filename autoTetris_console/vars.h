@@ -1,10 +1,9 @@
 #ifndef _VAR_H_
 #define _VAR_H_
 
-#include <pthread.h>
 #include <netinet/in.h>
 
-#define bool int
+//#define bool int
 #define false 0
 #define true 1
 
@@ -14,14 +13,11 @@
 #define mapHeight 20
 #define mapWidth 10
 
-extern int thread_num;
-extern int tetros[MAX_BUFF];
-extern int tetros_num[MAX_BUFF];
-extern int interval_coef;
-extern int scores[BACKLOG];
-extern bool thread_begin;
-extern char names[BACKLOG][12];
-extern pthread_mutex_t print_mutex;
+extern char recv_buf[MAX_BUFF];
+extern int crash;
+extern int over;
+extern int mapleft;
+extern int srs;
 
 typedef enum block
 {

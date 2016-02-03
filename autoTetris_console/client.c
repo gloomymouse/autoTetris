@@ -1,5 +1,5 @@
 /* 
- * autoTetris_client (v1.0.1)
+ * autoTetris_console (v1.0.0)
  * Copyright (c) 2016. GloomyMouse (Chaofei XU). All rights reserved.
  *
 **/
@@ -65,13 +65,8 @@ int main(int argc, char *argv[])
             break;
         }
     }
-
-    /*
-    pthread_t pid;
-    if (pthread_create(&pid, NULL, (void *)(&autoTetrisClient), (void *)(long)socket_fd) != 0)
-        printf("pthread_create Fail\n");
-    */
-    autoTetrisClient((void *)(long)socket_fd);
+    
+    autoTetrisConsole((void *)(long)socket_fd);
 
     system("clear");
     printf("Over!\n");

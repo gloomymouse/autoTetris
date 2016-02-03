@@ -1,5 +1,5 @@
 /*
- * autoTetris_server (v1.1.3)
+ * autoTetris_server (v1.1.4)
  * Copyright (c) 2016. GloomyMouse (Chaofei XU). All rights reserved.
  *
  */ 
@@ -22,16 +22,52 @@
 
 int main(int argc, char *argv[])
 {
-    if (argv[2] != NULL)
-        interval_coef = atoi(argv[2]);
-    if (interval_coef < 10)
-        interval_coef = 10;
-    else if (interval_coef > 10000)
-        interval_coef = 10000;
+    int arg;
+    int listen_port = 8888;
+    int interval_coef = 100;
+    int waiting = 10;
+    while ((arg = getopt(argc, argv, "ht:w:p:")) != -1)
+    {
+        switch(arg)
+        {
+            case 'h':
+                printf("autoTetris Server: version 1.1.4\n"
+                        "options:\n"
+                        "-h\n"
+                        "   help\n"
+                        "-p num\n"
+                        "   port\n"
+                        "-t num(10-10000)\n"
+                        "   interval time of each frame (ms)\n"
+                        "-w num\n"
+                        "   waiting time, for connecting (s)\n");
+                return 0;
+            case 'p':
+                listen_port = atoi(optarg);
+                break;
+            case 't':
+                if (atoi(optarg) < 10 || atoi(optarg) > 10000)
+                {
+                    printf("-t error\n");
+                    break;
+                }
+                interval_coef = atoi(optarg);
+                break;
+            case 'w':
+                if (atoi(optarg) < 1)
+                {
+                    printf("-w error\n");
+                    break;
+                }
+                waiting = atoi(optarg);
+                break;
+            case '?':
+                break;
+        }
+    }
 
     int socket_fd;
     int accept_fd;
-    int listen_port = atoi(argv[1]);
     struct sockaddr_in my_addr;
     struct sockaddr_in remote_addr;
     socklen_t sin_size = sizeof(struct sockaddr_in);
@@ -41,7 +77,6 @@ int main(int argc, char *argv[])
     fd_set fds;
     int max_fds;
     int nready;
-    int time_count = 0;
     struct timeval time_out = {1, 0};
 
     int i = 0;
@@ -86,10 +121,10 @@ int main(int argc, char *argv[])
         client[i].fd = -1;    
     }
 
-    while (time_count < 5)
+    while (waiting)
     {
-        printf("%ds left...\n", 5 - time_count);
-        time_count++;
+        printf("waiting for connecting, %ds left...\n", waiting);
+        waiting--;
         FD_ZERO(&fds);
         FD_SET(socket_fd, &fds);
         max_fds = socket_fd;
@@ -173,7 +208,14 @@ int main(int argc, char *argv[])
     }
 
     system("clear");
-    printf("Over!\n");
+    i = 0;
+    for (i = 0 ;i < BACKLOG; i++)
+    {
+        if (names[i][0] == '\0')
+            break;
+        printf("%-12s: %d\n", names[i], scores[i]);
+    }
+    printf("Game Over!\n");
     close(socket_fd);
     return 0;
 } 
