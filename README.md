@@ -11,15 +11,21 @@ Write your own AI to battle!
   - Enter `server\`
   - `make`
 2. Build AI clients
-  - C client (`AI\xu\`, by Gloomymouse Xu):
+  - C client **Gaea** (`AI\gaea\`, by Gloomymouse Xu):
   - Python client **Nuwa** (`AI\nuwa\`, by Frank Hu): you need Python 3 to run this AI
 
 ## How to play
 
 1. Initialize server
-  - Run server with arguments of your port: `autoTetris_server port time`
+  - Run server with arguments of your port: `server [-h] [-p num] [-t num] [-w num]`
+  - optional arguments:
+    - -h               how help and options message
+    - -p num           port
+    - -t num           interval time of each frame (ms)
+    - -w num           waiting time for connecting (s)
 2. Add AI clients
-  - C
+  - Gaea: C client
+    - `client server port`
   - Nuwa:
     - `client.py [-h] [-n] [-v] server port`
     - positional arguments:
