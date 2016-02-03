@@ -19,7 +19,7 @@ Write your own AI to battle!
 1. Initialize server
   - Run server with arguments of your port: `server [-h] [-p num] [-t num] [-w num]`
   - optional arguments:
-    - -h               how help and options message
+    - -h               Show help and options message
     - -p num           port
     - -t num           interval time of each frame (ms)
     - -w num           waiting time for connecting (s)
@@ -32,7 +32,7 @@ Write your own AI to battle!
       - server         server address
       - port           port
     - optional arguments:
-      - -h, --help     show this help message and exit
+      - -h, --help     Show this help message and exit
       - -n, --note     Note sequence of minos to "replay.txt".
       - -v, --verbose  Show more AI action details.
 
