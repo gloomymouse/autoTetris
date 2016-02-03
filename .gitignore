@@ -5,7 +5,7 @@ __pycache__/
 *.pyc
 bak/
 test/
-/autoTetris_server/autoTetris*
+/aitest
 /other
 *.o
 *.DS_Store
