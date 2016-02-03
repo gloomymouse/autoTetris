@@ -1,5 +1,5 @@
 /*
- * autoTetris_server (v1.1.4)
+ * autoTetris_server (v1.1.5)
  * Copyright (c) 2016. GloomyMouse (Chaofei XU). All rights reserved.
  *
  */ 
@@ -24,7 +24,7 @@ int main(int argc, char *argv[])
 {
     int arg;
     int listen_port = 8888;
-    int interval_coef = 100;
+    //int interval_coef = 100;  // global var, has been initialized.
     int waiting = 10;
     while ((arg = getopt(argc, argv, "ht:w:p:")) != -1)
     {
