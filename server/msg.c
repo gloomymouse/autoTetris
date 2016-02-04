@@ -26,10 +26,6 @@ void recvMsg(int client_sockfd, char *buffer)
         //printf("Receive message error\n");
         perror("recv() error\n");
     }
-    else
-    {
-        //printf("received message: %s\n", buffer);
-    }
 }
 
 bool readXML(char *key, char* value, char *msg)

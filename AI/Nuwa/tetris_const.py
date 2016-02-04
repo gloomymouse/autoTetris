@@ -6,6 +6,7 @@
 # define constants
 MAX_HEIGHT = 20
 MAX_WIDTH = 10
+BLANK_STATUS = [[0 for i in range(0, MAX_WIDTH)] for j in range(0, MAX_HEIGHT)]
 
 # define tetrominos
 class Tetromino:

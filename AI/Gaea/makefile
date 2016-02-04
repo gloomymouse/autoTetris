@@ -1,5 +1,5 @@
-autoTetris_client: vars.o msg.o ai.o tetris.o client.c
-	@gcc -g vars.o msg.o ai.o tetris.o client.c -o autoTetris_client -lpthread
+client: vars.o msg.o ai.o tetris.o client.c
+	@gcc -g vars.o msg.o ai.o tetris.o client.c -o client -lpthread
 tetris.o:
 	@gcc -o tetris.o -c tetris.c
 ai.o:

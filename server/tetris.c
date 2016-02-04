@@ -281,15 +281,37 @@ void autoTetrisServer(void *data)
     int tetro_index = 0;
     int next_index;
     int interval = interval_coef * 1000;
+    int frame = 0;
     int score = 0;
     int action = 0;
     bool down = false;
+    bool remap = false;
 
     int ret;
     fd_set rfds, wfds;  
     struct timeval time_out = {0, 0};
 
-    recvMsg(client_sockfd, recv_buf);
+    while (!thread_begin)
+    {
+        usleep(100);
+    }
+
+    FD_ZERO(&rfds);   
+    FD_SET(client_sockfd, &rfds);
+    time_out.tv_usec = 10;
+    ret = select(client_sockfd+1, &rfds, NULL, NULL, &time_out);
+    if (ret < 0)
+    {
+        perror("select() failed");
+        exit(1);
+    }
+    else
+    {
+        if (FD_ISSET(client_sockfd, &rfds))
+        {
+            recvMsg(client_sockfd, recv_buf);
+        }
+    }
     readXML(key, value, recv_buf);
     memset(name, 0, 12);
     memset(names[uid], 0, 12);
@@ -299,12 +321,6 @@ void autoTetrisServer(void *data)
         sprintf(name, "%s", value);
     strcpy(names[uid], name);
 
-    while (!thread_begin)
-    {
-        usleep(100);
-    }
-
-    //system("clear");
     initMap(map);
     pthread_mutex_lock(&print_mutex);
     printf("\033[0;0H");
@@ -367,23 +383,40 @@ void autoTetrisServer(void *data)
             ret = select(client_sockfd+1, &rfds, NULL, NULL, &time_out);
             if (ret < 0)
             {
-                //printf("select() failed");
                 perror("select() failed");
                 exit(1);
+            }
+            else if (ret == 0)
+            {
             }
             else    // ret == 0: time out
             {
                 if (FD_ISSET(client_sockfd, &rfds))
                 {
                     recvMsg(client_sockfd, recv_buf);
-                    strcat(recv_msg, recv_buf);
-                    //printf("=============== %s\n", recv_msg);
+                    remap = true;
                 }
             }
-            action = getAction(recv_msg, tetro, mapleft, down);
-            changeAction(tetro, &mapleft, &down, action);
-            reMap(map, tetro, mapleft, maptop, score, uid);
-            usleep(interval);
+            if (remap == true)
+            {
+                strcat(recv_msg, recv_buf);
+                action = getAction(recv_msg, tetro, mapleft, down);
+                changeAction(tetro, &mapleft, &down, action);
+                reMap(map, tetro, mapleft, maptop, score, uid);
+                remap = false;
+                frame++;
+            }
+            usleep(1000);
+            frame++;
+            if (frame >= interval_coef)
+            {
+                frame = 0;
+                reMap(map, tetro, mapleft, maptop, score, uid);
+            }
+            else
+            {
+                continue;
+            }
             maptop++;
             if (determineCrash(map, tetro, mapleft, maptop))
             {
