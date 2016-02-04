@@ -3,6 +3,7 @@ aitest/
 bak/
 other/
 test/
+.DS_Store
 
 # Repo specific settings
 Gist.ipynb
