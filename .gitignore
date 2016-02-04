@@ -1,3 +1,9 @@
+# Personal settings
+aitest/
+bak/
+other/
+test/
+
 # Repo specific settings
 Gist.ipynb
 *.txt
