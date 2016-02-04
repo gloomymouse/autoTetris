@@ -9,12 +9,16 @@ import re
 import tetris_AI
 
 
+TETRO = re.compile('<tetro>')
+OVER = re.compile('<over>')
+CRASH = re.compile('<crash>')
 MINO = re.compile('<tetro>.*?</tetro>')
 NEXT_MINO = re.compile('<next>.*?</next>')
 MAP_STATUS = re.compile('<map>.*?</map>')
 
 
 def main():
+    # parse arugments
     parser = argparse.ArgumentParser()
     parser.add_argument('-n', '--note',
                         help='Note sequence of minos to "replay.txt".',
@@ -27,25 +31,24 @@ def main():
     args = parser.parse_args()
     server = args.server
     port = int(args.port)
-    replay = 0 # init replay: for note = 0
+    replay = 0  # init replay: for note = 0
     if args.note:
         replay = open('replay.txt', 'w')
 
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.connect((server, port))
+    s.send('<name>Nuwa</name>'.encode('utf-8'))
 
     while True:
         data = s.recv(1024)
         server_data = str(data, encoding='utf-8')
-        if re.match('<over>', server_data):
+        if re.match(OVER, server_data):  # game over
             break
-        elif re.match('<crash>', server_data):
-            pass
-        else:
-            action_string = parse_string(server_data, args.note, args.verbose, replay)
+        elif re.search(TETRO, server_data):  # new tetromino
+            action_string = parse_string(server_data, args.note,
+                                         args.verbose, replay)
             s.send(action_string.encode('utf-8'))
-        if not data:
-            break
+        # else we got crash infomation and pass
     s.close()
 
 
