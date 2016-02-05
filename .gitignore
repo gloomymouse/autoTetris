@@ -1,13 +1,16 @@
-# Personal settings
+# Personal settings of Gloomymouse Xu
 aitest/
 bak/
 other/
 test/
 .DS_Store
 
-# Repo specific settings
+# Personal settings of Frank Hu
 Gist.ipynb
 *.txt
+server/server
+console/autoTetris_console
+AI/Gaea/client
 
 # C
 # Object files
