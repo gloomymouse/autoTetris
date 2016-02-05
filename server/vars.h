@@ -19,9 +19,14 @@ extern int tetros[MAX_BUFF];
 extern int tetros_num[MAX_BUFF];
 extern int interval_coef;
 extern int scores[BACKLOG];
+extern int nexts[BACKLOG];
+extern int maptops[BACKLOG];
 extern bool thread_begin;
+extern bool crashs[BACKLOG];
+extern bool overs[BACKLOG];
 extern char names[BACKLOG][12];
 extern pthread_mutex_t print_mutex;
+extern pthread_mutex_t crash_mutex;
 
 typedef enum block
 {
@@ -52,5 +57,6 @@ typedef struct Tetromino
 } Tetromino;
 
 extern Tetromino ts, tz, tl, tj, ti, to ,tt; 
+extern block maps[BACKLOG][mapHeight+1][mapWidth];
 
 #endif

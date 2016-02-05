@@ -5,9 +5,15 @@ int tetros[MAX_BUFF] = {0};
 int tetros_num[MAX_BUFF] = {0};
 int interval_coef = 100;
 int scores[BACKLOG] = {0};
+int nexts[BACKLOG] = {0};
+int maptops[BACKLOG] = {0};
 bool thread_begin = false;
+bool crashs[BACKLOG] = {false};
+bool overs[BACKLOG] = {false};
 char names[BACKLOG][12];
 pthread_mutex_t print_mutex = PTHREAD_MUTEX_INITIALIZER;
+pthread_mutex_t crash_mutex = PTHREAD_MUTEX_INITIALIZER;
+block maps[BACKLOG][mapHeight+1][mapWidth] = {Blank};
 
 Tetromino ts = 
 {
