@@ -1,5 +1,5 @@
 /*
- * autoTetris_server (v1.1.5)
+ * autoTetris_server (v1.2.0)
  * Copyright (c) 2016. GloomyMouse (Chaofei XU). All rights reserved.
  *
  */ 
@@ -179,6 +179,9 @@ int main(int argc, char *argv[])
             }
         }
     }
+    pthread_t pid;
+        if (pthread_create(&pid, NULL, (void *)(&downTimer), NULL) != 0)
+            printf("pthread_create Fail\n");
 
     printf("%d Clients Connected. Start!\n", thread_num);
     memset(tetros, 0, sizeof(tetros));
@@ -193,11 +196,45 @@ int main(int argc, char *argv[])
     }
     i = 0;
 
+    thread_begin = true;
+    struct Tetromino nlist[7] = {ts, tz, tl, tj, ti, to, tt};
     sleep(1);
     system("clear");
-    thread_begin = true;
+    printf("\033[?25l");
+    fflush(stdout);
+    for (int uid = 0 ;uid < BACKLOG; uid++)
+    {
+        printf("\033[0;0H");
+        printf("\033[%dC", uid * 12);
+        printf("%s", names[uid]);
+        fflush(stdout);
+    }
     while (thread_num)
     {
+        for (int uid = 0 ;uid < BACKLOG; uid++)
+        {
+            if (names[uid][0] == '\0')
+                break;
+            if (overs[uid] == true)
+            {
+                printf("\033[0;0H");
+                printf("\n\n");
+                printf("\033[%dC", uid * 12);
+                printf(" Game Over! \n");
+                printf("\033[0;0H");
+                fflush(stdout);
+                continue;
+            }
+            printf("\033[0;0H");
+            printf("\033[1B");
+            drawMap(maps[uid], scores[uid], uid);
+            printf("\033[0;0H");
+            drawNext(&nlist[tetros[nexts[uid]]], uid);
+            printf("\033[0;0H");
+            printf("\033[1B");
+            fflush(stdout);
+        }
+        usleep(10000);
         i = i % MAX_BUFF;
         if (tetros_num[i] == thread_num)
         {
@@ -208,7 +245,6 @@ int main(int argc, char *argv[])
     }
 
     system("clear");
-    i = 0;
     for (i = 0 ;i < BACKLOG; i++)
     {
         if (names[i][0] == '\0')
@@ -216,6 +252,8 @@ int main(int argc, char *argv[])
         printf("%-12s: %d\n", names[i], scores[i]);
     }
     printf("Game Over!\n");
+    printf("\33[?25h");
+    fflush(stdout);
     close(socket_fd);
     return 0;
 } 

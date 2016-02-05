@@ -11,6 +11,8 @@ Tetromino *initTetro(Tetromino*, int);
 
 void drawMap(block[][mapWidth], int, int);
 
+void copyDrawMap(block[][mapWidth], int);
+
 void drawNext(Tetromino*, int);
 
 bool determineCrash(block[][mapWidth], Tetromino*, int, int);
@@ -24,6 +26,8 @@ void reMap(block[][mapWidth], Tetromino*, int, int, int, int);
 void copyMap(block[][mapWidth], char*);
 
 bool gameOver(block[][mapWidth], Tetromino*, int, int);
+
+void downTimer();
 
 void autoTetrisServer(void*);
 
