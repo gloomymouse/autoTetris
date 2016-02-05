@@ -213,7 +213,7 @@ void autoTetrisClient(void *data)
     //printf("pthread_create() succeed\n");
     //pthread_detach(pthread_self());
     int socket_fd = (int)data;
-    char *name = "G.M.";
+    char *name = "Gaea";
     char send_buf[MAX_BUFF];
     char send_msg[MAX_BUFF];
     char recv_buf[MAX_BUFF];
