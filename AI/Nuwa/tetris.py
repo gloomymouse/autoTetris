@@ -1,7 +1,8 @@
+# -*- coding: utf-8 -*-
 # Tetris AI v0.1
 # Related to tetris project of Organization Laboratory
 # Author: Frank-the-Obscure (Frank Hu)
-# -*- coding: utf-8 -*-
+# This file contains constants and class of Tetromino
 
 # define constants
 MAX_HEIGHT = 20
@@ -11,6 +12,7 @@ BLANK_STATUS = [[0 for i in range(0, MAX_WIDTH)] for j in range(0, MAX_HEIGHT)]
 # define tetrominos
 class Tetromino:
     def __init__(self, name):
+        self.name = name
         if name is 's':
             self.images = [
               [0, 1, 1, 0,
@@ -31,7 +33,11 @@ class Tetromino:
               [1, 0, 0, 0,
                1, 1, 0, 0,
                0, 1, 0, 0,
-               0, 0, 0, 0]]
+               0, 0, 0, 0]
+              ]
+            self.max_rotate = 2
+            self.max_width = [8, 8, 8, 9]
+
         elif name is 'z':
             self.images = [
               [1, 1, 0, 0,
@@ -53,6 +59,9 @@ class Tetromino:
                1, 1, 0, 0,
                1, 0, 0, 0,
                0, 0, 0, 0]]
+            self.max_rotate = 2
+            self.max_width = [8, 8, 8, 9]
+
         elif name is 'l':
             self.images = [
               [0, 0, 1, 0,
@@ -74,6 +83,9 @@ class Tetromino:
                0, 1, 0, 0,
                0, 1, 0, 0,
                0, 0, 0, 0]]
+            self.max_rotate = 4
+            self.max_width = [8, 8, 8, 9]
+
         elif name is 'j':
             self.images = [
               [1, 0, 0, 0,
@@ -95,6 +107,9 @@ class Tetromino:
                0, 1, 0, 0,
                1, 1, 0, 0,
                0, 0, 0, 0]]
+            self.max_rotate = 4
+            self.max_width = [8, 8, 8, 9]
+
         elif name is 'i':
             self.images = [
               [0, 0, 0, 0,
@@ -116,6 +131,9 @@ class Tetromino:
                0, 1, 0, 0,
                0, 1, 0, 0,
                0, 1, 0, 0]]
+            self.max_rotate = 2
+            self.max_width = [7, 8, 7, 9]
+
         elif name is 'o':
             self.images = [
              [0, 1, 1, 0,
@@ -137,6 +155,9 @@ class Tetromino:
               0, 1, 1, 0,
               0, 0, 0, 0,
               0, 0, 0, 0]]
+            self.max_rotate = 1
+            self.max_width = [8, 8, 8, 8]
+
         elif name is 't':
             self.images =[
               [0, 1, 0, 0,
@@ -158,6 +179,9 @@ class Tetromino:
                1, 1, 0, 0,
                0, 1, 0, 0,
                0, 0, 0, 0]]
+            self.max_rotate = 4
+            self.max_width = [8, 8, 8, 9]
+
     def clean_up(self, rotate):
         """Clean up mino to provide a minimum 2d-matrix.
 
