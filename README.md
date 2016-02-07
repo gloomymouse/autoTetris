@@ -12,7 +12,7 @@ Write your own AI to battle!
   - `make`
 2. Build AI clients
   - C client **Gaea** (`AI\gaea\`, by Gloomymouse Xu):
-  - Python client **Nuwa** (`AI\nuwa\`, by Frank Hu): you need Python 3 to run this AI
+  - Python client **Nuwa** (`AI\nuwa\`, by Frank Hu): you need Python 3 and numpy to run this AI
 
 ## How to play
 
@@ -39,6 +39,8 @@ Write your own AI to battle!
 ## How to write your own AI
 
 1. Connect to server
+  - connections in AutoTetris use socket
+  - send `<name>Nuwa</name>` to connect to server and register your name
 2. Play the game
   - Server information
     - new tetromino: `<inter>interval_time</inter><tetro>tx</tetro><next>tx</next><map>map_infomation</map>`
@@ -51,5 +53,5 @@ Write your own AI to battle!
   - Client response
     - `<coor>{}</coor><srs>{}</srs><down>{}</down>`
       - coor: position (0 to 9)
-      - srs: rotation (0 to 3)
+      - srs: rotation (0 to 3), for details of shape of tetrominos, see [wiki](https://github.com/gloomymouse/autoTetris/wiki/The-convention-of-the-shape-and-rotate-of-tetrominos)
       - down: fast-bottom (0/1, 1 means direct let this tetromino to bottom)

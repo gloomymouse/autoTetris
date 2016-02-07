@@ -7,7 +7,7 @@ test/
 
 # Personal settings of Frank Hu
 Gist.ipynb
-*.txt
+AI/Nuwa/*.txt
 server/server
 console/autoTetris_console
 AI/Gaea/client

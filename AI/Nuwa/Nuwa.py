@@ -55,6 +55,12 @@ def ai_action(status, tetromino, next_mino, verbose=False):
                         action_rot = rotate
                         action_next_pos = next_pos
                         action_next_rot = next_rot
+                        if verbose:  # output action
+                            print('mino is {}, best action is: {},{};\
+                                next action is: {}, {}. score is {}'\
+                                .format(tetromino.name, action_pos, action_rot,
+                                action_next_pos, action_next_rot, best_score))
+
     if verbose:  # output action
         print('mino is {}, best action is: {},{};\
             next action is: {}, {}. score is {}'\

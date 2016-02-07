@@ -43,6 +43,7 @@ def main():
     while True:
         data = s.recv(1024)
         server_data = str(data, encoding='utf-8')
+        #print(server_data)
         if re.match(OVER, server_data):  # game over
             break
         elif re.search(TETRO, server_data):  # new tetromino
@@ -77,7 +78,7 @@ def parse_string(server_data, note, verbose, replay):
             Nuwa.ai_action(status, mino, next_mino, verbose)
 
     action_string = '<coor>{}</coor><srs>{}</srs><down>{}</down>'\
-            .format(action_position, action_rotate, '0')
+            .format(action_position, action_rotate, '1')
     return action_string
 
 main()
