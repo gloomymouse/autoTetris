@@ -3,9 +3,14 @@
 # Author: Frank-the-Obscure (Frank Hu)
 # -*- coding: utf-8 -*-
 
-from tetris_const import *
+from tetris import *
 from copy import deepcopy
 import numpy as np
+
+
+BIG_UNDER_BLOCKS = 50
+BIG_SCORE = 65535
+
 
 def ai_action(status, tetromino, next_mino, verbose=False):
     """Choose best action for the status and the new tetromino.
@@ -16,23 +21,52 @@ def ai_action(status, tetromino, next_mino, verbose=False):
         3. output option
     todo: add next tetromino for this func.
     """
+
+    #init class of tetraminos
+    tetromino = Tetromino(tetromino)
+    next_mino = Tetromino(next_mino)
+    max_rotate_mino = tetromino.max_rotate
+    max_rotate_next = next_mino.max_rotate
+    max_width_mino = tetromino.max_width
+    max_width_next = next_mino.max_width
     #init temp variables
-    best_score = 65535
-    action_position = 0
-    action_rotate = 0
-    for position in range(0, MAX_WIDTH):
-        for rotate in range(0, 4): # todo: revise with mino.rotate
-            if is_valid_status(tetromino, position, rotate):
-                new_status = generate(status, tetromino, position, rotate)
-                temp_score = score(new_status)
-                if temp_score < best_score:
-                    best_score = temp_score
-                    action_position = position
-                    action_rotate = rotate
+    best_score = BIG_SCORE
+    best_height = MAX_HEIGHT  # to reduce search
+    best_under_blocks = BIG_UNDER_BLOCKS
+    action_pos = 0
+    action_rot = 0
+    action_next_pos = 0
+    action_next_rot = 0
+    for rotate in range(0, max_rotate_mino):
+        for position in range(0, max_width_mino[rotate]):
+            new_status = generate(status, tetromino, position, rotate)
+            for next_rot in range(0, max_rotate_next):
+                for next_pos in range(0, max_width_next[next_rot]):
+                    next_status = generate(new_status, next_mino,
+                                           next_pos, next_rot)
+                    temp_score, temp_height, temp_under_blocks = \
+                            score(next_status, best_height, best_under_blocks)
+                    if temp_score < best_score:
+                        # if find better action
+                        best_height = temp_height
+                        best_score = temp_score
+                        best_under_blocks = temp_under_blocks
+                        action_pos = position
+                        action_rot = rotate
+                        action_next_pos = next_pos
+                        action_next_rot = next_rot
+                        if verbose:  # output action
+                            print('mino is {}, best action is: {},{};\
+                                next action is: {}, {}. score is {}'\
+                                .format(tetromino.name, action_pos, action_rot,
+                                action_next_pos, action_next_rot, best_score))
+
     if verbose:  # output action
-        print('mino is {}, best action is: {},{}. score is {}'.format(
-            tetromino, action_position, action_rotate, best_score))
-    return action_position, action_rotate
+        print('mino is {}, best action is: {},{};\
+            next action is: {}, {}. score is {}'\
+            .format(tetromino.name, action_pos, action_rot,
+                    action_next_pos, action_next_rot, best_score))
+    return action_pos, action_rot
 
 
 def is_valid_status(tetromino, position, rotate):
@@ -54,8 +88,8 @@ def generate(status, tetromino, position, rotate):
     """
     # prepare shape and profiles of status and mino
     status_profile = profile_status(status)
-    # print('mino, pos, rotate:', tetromino, position, rotate) # debugging
-    mino, mino_profile = Tetromino(tetromino).clean_up(rotate)
+    # print('mino, pos, rotate:', tetromino.name, position, rotate) # debugging
+    mino, mino_profile = tetromino.clean_up(rotate)
     #calculate for columns
     final_mino_height = 0
     for i in range(0, len(mino)): #len(mino) is the width of mino
@@ -90,7 +124,7 @@ def transpose(matrix):
     return np.array(matrix).T.tolist() # transpose array by numpy
 
 
-def score(status):
+def score(status, best_height=MAX_HEIGHT, best_under_blocks=BIG_UNDER_BLOCKS):
     """Score the status.
 
     input: status: an 2d-matrix, from top, line first
@@ -105,9 +139,14 @@ def score(status):
 
     # 0. clear status
     status, num_cleared_rows = clear(status)
+    # test
+    if num_cleared_rows >= 4:
+        print(num_cleared_rows) #find if great clear happens
     #pprint.pprint(status)
     # 1. cal height
     height = height_status(status)
+    if height - best_height >= 4:  # guess it's a bad position and skip
+        return BIG_SCORE, MAX_HEIGHT, BIG_UNDER_BLOCKS
 
     # 2. under blocks
     status_T = transpose(status)
@@ -126,6 +165,8 @@ def score(status):
                 flag = True
                 # calculate relative height, max height of blocks is 0
                 profile[column] = MAX_HEIGHT - row
+    if sum(under_blocks) - best_under_blocks > 2:
+        return BIG_SCORE, MAX_HEIGHT, BIG_UNDER_BLOCKS
     #print('under blocks', under_blocks)
 
     # 3. score the status
@@ -136,25 +177,30 @@ def score(status):
     # 3.5 status of first available line
     # 3.6 distribution of under blocks(todo)
     score_status = 0
-    score_status -= num_cleared_rows * 20  # minus cleared rows
-    score_status += height * 5  # add height
+    # minus cleared rows: **2 is testing
+    score_status -= num_cleared_rows**2 * 50
+    # add height & profile height
+    score_status += height * 5
+    if height >= 10:
+        score_status += (height - 10) * 100
     for i in profile:
         score_status += i  # add minor height(profile height)
 
     for num in under_blocks:
-        score_status += num * 10  # add under blocks
+        score_status += num * 50  # add under blocks
 
-    for i in range(0, MAX_WIDTH - 1):  # add big gaps
+    score_status += score_profile(profile)
+    """for i in range(0, MAX_WIDTH - 1):  # add big gaps
         # todo: punish more when big gap comes.
         gap_right = profile[i] - profile[i + 1]
         if i is 0 or i is (MAX_WIDTH - 2):  # boundary
             if gap_right <= -2:
-                score_status += gap_right ** 2 * 5
+                score_status += gap_right**2 * 5
         else:
             gap_left = profile[i] - profile[i - 1]
             if gap_right <= -2 and gap_left <= -2:  # a gap
-                score_status += (max(gap_right, gap_left) ** 2) * 5
-
+                score_status += (max(gap_right, gap_left) ** 2) * 5"""
+    # status of first available line
     first_available_row = MAX_HEIGHT - 1
     for row in under_block_matrix:
         for block in row:
@@ -165,13 +211,13 @@ def score(status):
                 break
         if first_available_row < MAX_HEIGHT - 1:
             break
-    score_status -= first_available_row * 10
-        # guess this height is more important than general height
+    score_status -= first_available_row * 50
+        # guess height of first available line is more important than height
     for block in status[first_available_row]:
         if block:  # the more blocks in that line, easier to clear that line.
             score_status -= 3
     #print('score is :', score_status)
-    return score_status
+    return score_status, height, sum(under_blocks)
 
 
 def height_status(status):
@@ -179,7 +225,8 @@ def height_status(status):
     height = 0
     for i in range(0, MAX_HEIGHT):
         for j in range(0, MAX_WIDTH):
-            if (j is not 0 or j is not MAX_WIDTH - 1) and status[i][j] is not 0:
+            if  status[i][j]:
+            # if (j and j is not MAX_WIDTH - 1) and status[i][j]:
                 # ignore side height
                 height = MAX_HEIGHT - i
                 break
@@ -205,6 +252,54 @@ def profile_status(status):
     return profile
 
 
+def score_profile(profile):
+    """Score profile of status, find gaps and punish score.
+
+    input: profile list
+    process:
+        1. find 1-2 gaps and punish
+        2. punish max height - min height
+    output: score to be added"""
+
+    added_score = 0
+    i = 0
+    while i < MAX_WIDTH - 1:
+        gap_right = profile[i] - profile[i+1]
+        if i is 0:  # left boundary
+            if gap_right <= -2:
+                added_score += gap_right**2 * 5  # parameter here
+                i += 1 # skip column (i+1), as it's higher than i
+            elif profile[i+1] - profile[i+2] <= -2:  # 2 column gap
+                added_score += (profile[i+2] - max(profile[i], profile[i+1]))\
+                                **2 * 2
+                i += 2 # skip i+1 and i+2
+        elif i is (MAX_WIDTH - 2): # right boundary: only 1 column gap
+            if 0 - gap_right <= -2:
+                added_score += gap_right**2 * 5  #parameter here
+            elif profile[i] - profile[i-1] <= -2:
+                added_score += (profile[i-1] - max(profile[i], profile[i+1]))\
+                                ** 2 * 2
+            break  #skip last add and cycle
+        else:  # not left and right
+            gap_left = profile[i] - profile[i-1]
+            if gap_left <= -2:
+                if gap_right <= -2:  # single col gap
+                    # gap are number < 0, so use max to choose smaller gap
+                    added_score += (max(gap_right, gap_left) ** 2) * 5
+                    i += 1  # skip column (i+1), as it's higher than i
+                elif profile[i+1] - profile[i+2] <= -2:  # 2 col gap
+                    added_score += max(gap_left, profile[i+1] - profile[i+2])\
+                                    **2 * 3
+                    i += 2  # skip column i+1, i+2
+        i += 1
+
+    # punish max height - min height
+    delta_h = max(profile) - min(profile)
+    if delta_h > 3:  # this line lead to much more under blocks, abondon now
+        added_score += delta_h ** 2
+    return added_score
+
+
 def build_test_case():
     """Build test cases.
     """
@@ -227,7 +322,8 @@ def print_mino(tetromino, position, rotate):
     """print mino with position and rotate."""
 
     mino, mino_profile = Tetromino(tetromino).clean_up(rotate)
-    print_mino = [[0 for i in range(0, len(mino[0]))] for j in range(0, position)] + mino
+    print_mino = [[0 for i in range(0, len(mino[0]))]\
+                  for j in range(0, position)] + mino
     print_mino = transpose(print_mino)
     # print row matrix for mino
     for row in print_mino:
@@ -258,10 +354,12 @@ def main():
             # press enter for next mino
             print('mino is', mino)
             print_status(test_status)
-            action_position, action_rotate =  ai_action(test_status, mino, next_mino)
-            test_status = generate(test_status, mino, action_position, action_rotate)
+            action_pos, action_rot = ai_action(test_status, mino,
+                                               next_mino, verbose=True)
+            test_status = generate(test_status, Tetromino(mino),
+                                   action_pos, action_rot)
             test_status, cleaned_rows = clear(test_status)
-            print_mino(mino, action_position, action_rotate)
+            print_mino(mino, action_pos, action_rot)
         else:  # any other input means end testing.
             break
         i += 1
@@ -269,3 +367,4 @@ def main():
 
 if __name__ == '__main__':
     main()
+    print(score_profile([5,0,0,0,5, 5,5,5,5,5]))

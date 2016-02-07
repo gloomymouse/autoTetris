@@ -6,7 +6,8 @@ from sys import argv
 import argparse
 import socket
 import re
-import tetris_AI
+import Nuwa
+import time
 
 
 TETRO = re.compile('<tetro>')
@@ -42,12 +43,16 @@ def main():
     while True:
         data = s.recv(1024)
         server_data = str(data, encoding='utf-8')
+        #print(server_data)
         if re.match(OVER, server_data):  # game over
             break
         elif re.search(TETRO, server_data):  # new tetromino
+            t0 = time.time()
             action_string = parse_string(server_data, args.note,
                                          args.verbose, replay)
             s.send(action_string.encode('utf-8'))
+            t1 = time.time()
+            print('time: {:.2f}'.format(t1 - t0))
         # else we got crash infomation and pass
     s.close()
 
@@ -70,10 +75,10 @@ def parse_string(server_data, note, verbose, replay):
         status.append([int(j) for j in map_status[i*10 : i*10+10]])
 
     action_position, action_rotate =\
-            tetris_AI.ai_action(status, mino, next_mino, verbose)
+            Nuwa.ai_action(status, mino, next_mino, verbose)
 
     action_string = '<coor>{}</coor><srs>{}</srs><down>{}</down>'\
-            .format(action_position, action_rotate, '0')
+            .format(action_position, action_rotate, '1')
     return action_string
 
 main()
