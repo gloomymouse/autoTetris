@@ -12,6 +12,11 @@ BLANK_STATUS = [[0 for i in range(0, MAX_WIDTH)] for j in range(0, MAX_HEIGHT)]
 # define tetrominos
 class Tetromino:
     def __init__(self, name):
+        """Init name, images, max_rotate, max_width.
+
+        images: 2d matrix
+        max_rotate: to reduce duplicates
+        max_width: to reduce invalid position in searching"""
         self.name = name
         if name is 's':
             self.images = [
@@ -36,7 +41,7 @@ class Tetromino:
                0, 0, 0, 0]
               ]
             self.max_rotate = 2
-            self.max_width = [8, 8, 8, 9]
+            self.max_width = [8, 9, 8, 9]
 
         elif name is 'z':
             self.images = [
@@ -60,7 +65,7 @@ class Tetromino:
                1, 0, 0, 0,
                0, 0, 0, 0]]
             self.max_rotate = 2
-            self.max_width = [8, 8, 8, 9]
+            self.max_width = [8, 9, 8, 9]
 
         elif name is 'l':
             self.images = [
@@ -84,7 +89,7 @@ class Tetromino:
                0, 1, 0, 0,
                0, 0, 0, 0]]
             self.max_rotate = 4
-            self.max_width = [8, 8, 8, 9]
+            self.max_width = [8, 9, 8, 9]
 
         elif name is 'j':
             self.images = [
@@ -108,7 +113,7 @@ class Tetromino:
                1, 1, 0, 0,
                0, 0, 0, 0]]
             self.max_rotate = 4
-            self.max_width = [8, 8, 8, 9]
+            self.max_width = [8, 9, 8, 9]
 
         elif name is 'i':
             self.images = [
@@ -132,7 +137,7 @@ class Tetromino:
                0, 1, 0, 0,
                0, 1, 0, 0]]
             self.max_rotate = 2
-            self.max_width = [7, 8, 7, 9]
+            self.max_width = [7, 10, 7, 10]
 
         elif name is 'o':
             self.images = [
@@ -156,7 +161,7 @@ class Tetromino:
               0, 0, 0, 0,
               0, 0, 0, 0]]
             self.max_rotate = 1
-            self.max_width = [8, 8, 8, 8]
+            self.max_width = [9, 9, 9, 9]
 
         elif name is 't':
             self.images =[
@@ -180,7 +185,7 @@ class Tetromino:
                0, 1, 0, 0,
                0, 0, 0, 0]]
             self.max_rotate = 4
-            self.max_width = [8, 8, 8, 9]
+            self.max_width = [8, 9, 8, 9]
 
     def clean_up(self, rotate):
         """Clean up mino to provide a minimum 2d-matrix.
@@ -188,44 +193,49 @@ class Tetromino:
         rotate: 0, 1, 2, 3
         Output:
             column matrix: nested 2d-matrix
-            profile: list of mino profile, 0 is bottom
+            profile: list of mino profile, 0 is bottom, -1 means 1 block up
         """
-        shape = self.images[rotate]
-        row_matrix = [[shape[i], shape[i+1], shape[i+2], shape[i+3]]
-                 for i in [0, 4, 8, 12]] # transfer to matrix
-        # clean up rows
-        for i in range(len(row_matrix) - 1, -1, -1):
-            flag = 0
-            for block in row_matrix[i]:
-                if block is 1:
-                    flag = 1
-                    break
-            if flag is 0: # blank row
-                del row_matrix[i]
-        import numpy as np
-        col_matrix = np.array(row_matrix).T.tolist()
-        # clean up columns
-        for i in range(len(col_matrix) - 1, -1, -1):
-            flag = 0
-            for block in col_matrix[i]:
-                if block == 1:
-                    flag = 1
-                    break
-            if flag == 0: # blank col
-                del col_matrix[i]
 
-        # Calculate profile from col_matrix.
-        profile = []
-        for column in col_matrix:
-            last_block = 0
-            for i in range(len(column) - 1, -1, -1):
-                if column[i] is 1:
-                    last_block = i
-                    break
-            profile.append(last_block + 1 - len(column))
-
-        return col_matrix, profile
-
+        if self.name is 's':
+            return [
+                ([[0, 1], [1, 1], [1, 0]], [0, 0, -1]),
+                ([[1, 1, 0], [0, 1, 1]], [-1, 0])
+                   ][rotate]
+        elif self.name is 'z':
+            return [
+                ([[1, 0], [1, 1], [0, 1]], [-1, 0, 0]),
+                ([[0, 1, 1], [1, 1, 0]], [0, -1])
+                    ][rotate]
+        elif self.name is 'l':
+            return [
+                ([[1, 0], [1, 1], [0, 1]], [-1, 0, 0]),
+                ([[1, 1, 1], [0, 0, 1]], [0, 0]),
+                ([[1, 1], [1, 0], [1, 0]], [0, -1, -1]),
+                ([[1, 0, 0], [1, 1, 1]], [-2, 0])
+                  ][rotate]
+        elif self.name is 'j':
+            return [
+                ([[1, 1], [0, 1], [0, 1]], [0, 0, 0]),
+                ([[1, 1, 1], [1, 0, 0]], [0, -2]),
+                ([[1, 0], [1, 0], [1, 1]], [-1, -1, 0]),
+                ([[0, 0, 1], [1, 1, 1]], [0, 0])
+                  ][rotate]
+        elif self.name is 'i':
+            return [
+                ([[1], [1], [1], [1]], [0, 0, 0, 0]),
+                ([[1, 1, 1, 1]], [0])
+                    ][rotate]
+        elif self.name is 'o':
+            return [
+                ([[1, 1], [1, 1]], [0, 0])
+                    ][rotate]
+        elif self.name is 't':
+            return [
+                ([[0, 1], [1, 1], [0, 1]], [0, 0, 0]),
+                ([[1, 1, 1], [0, 1, 0]], [0, -1]),
+                ([[1, 0], [1, 1], [1, 0]], [-1, 0, -1]),
+                ([[0, 1, 0], [1, 1, 1]], [-1, 0])
+                    ][rotate]
 
 if __name__ == '__main__':
     ts = Tetromino('t')

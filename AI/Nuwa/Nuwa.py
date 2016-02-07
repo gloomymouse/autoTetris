@@ -8,6 +8,7 @@ from copy import deepcopy
 import numpy as np
 
 
+BIG_UNDER_BLOCKS = 50
 BIG_SCORE = 65535
 
 
@@ -31,6 +32,7 @@ def ai_action(status, tetromino, next_mino, verbose=False):
     #init temp variables
     best_score = BIG_SCORE
     best_height = MAX_HEIGHT  # to reduce search
+    best_under_blocks = BIG_UNDER_BLOCKS
     action_pos = 0
     action_rot = 0
     action_next_pos = 0
@@ -42,11 +44,13 @@ def ai_action(status, tetromino, next_mino, verbose=False):
                 for next_pos in range(0, max_width_next[next_rot]):
                     next_status = generate(new_status, next_mino,
                                            next_pos, next_rot)
-                    temp_score, temp_height = score(next_status, best_height)
+                    temp_score, temp_height, temp_under_blocks = \
+                            score(next_status, best_height, best_under_blocks)
                     if temp_score < best_score:
                         # if find better action
                         best_height = temp_height
                         best_score = temp_score
+                        best_under_blocks = temp_under_blocks
                         action_pos = position
                         action_rot = rotate
                         action_next_pos = next_pos
@@ -114,7 +118,7 @@ def transpose(matrix):
     return np.array(matrix).T.tolist() # transpose array by numpy
 
 
-def score(status, best_height=MAX_HEIGHT):
+def score(status, best_height=MAX_HEIGHT, best_under_blocks=BIG_UNDER_BLOCKS):
     """Score the status.
 
     input: status: an 2d-matrix, from top, line first
@@ -130,13 +134,13 @@ def score(status, best_height=MAX_HEIGHT):
     # 0. clear status
     status, num_cleared_rows = clear(status)
     # test
-    if num_cleared_rows >= 3:
+    if num_cleared_rows >= 4:
         print(num_cleared_rows) #find if great clear happens
     #pprint.pprint(status)
     # 1. cal height
     height = height_status(status)
-    if height - best_height >= 3:  # guess it's a bad position and skip
-        return BIG_SCORE, MAX_HEIGHT
+    if height - best_height >= 4:  # guess it's a bad position and skip
+        return BIG_SCORE, MAX_HEIGHT, BIG_UNDER_BLOCKS
 
     # 2. under blocks
     status_T = transpose(status)
@@ -155,7 +159,9 @@ def score(status, best_height=MAX_HEIGHT):
                 flag = True
                 # calculate relative height, max height of blocks is 0
                 profile[column] = MAX_HEIGHT - row
-    print('under blocks', under_blocks)
+    if sum(under_blocks) - best_under_blocks > 2:
+        return BIG_SCORE, MAX_HEIGHT, BIG_UNDER_BLOCKS
+    #print('under blocks', under_blocks)
 
     # 3. score the status
     # 3.1 height
@@ -169,11 +175,13 @@ def score(status, best_height=MAX_HEIGHT):
     score_status -= num_cleared_rows**2 * 50
     # add height & profile height
     score_status += height * 5
+    if height >= 10:
+        score_status += (height - 10) * 100
     for i in profile:
         score_status += i  # add minor height(profile height)
 
     for num in under_blocks:
-        score_status += num * 10  # add under blocks
+        score_status += num * 50  # add under blocks
 
     score_status += score_profile(profile)
     """for i in range(0, MAX_WIDTH - 1):  # add big gaps
@@ -197,13 +205,13 @@ def score(status, best_height=MAX_HEIGHT):
                 break
         if first_available_row < MAX_HEIGHT - 1:
             break
-    score_status -= first_available_row * 10
+    score_status -= first_available_row * 50
         # guess height of first available line is more important than height
     for block in status[first_available_row]:
         if block:  # the more blocks in that line, easier to clear that line.
             score_status -= 3
     #print('score is :', score_status)
-    return score_status, height
+    return score_status, height, sum(under_blocks)
 
 
 def height_status(status):
@@ -276,13 +284,13 @@ def score_profile(profile):
                 elif profile[i+1] - profile[i+2] <= -2:  # 2 col gap
                     added_score += max(gap_left, profile[i+1] - profile[i+2])\
                                     **2 * 3
-                    i += 2
+                    i += 2  # skip column i+1, i+2
         i += 1
-    '''
+
     # punish max height - min height
     delta_h = max(profile) - min(profile)
-    if delta_h > 3: this line lead to much more under blocks, abondon now
-        added_score += delta_h**2 * 5'''
+    if delta_h > 3:  # this line lead to much more under blocks, abondon now
+        added_score += delta_h ** 2
     return added_score
 
 
