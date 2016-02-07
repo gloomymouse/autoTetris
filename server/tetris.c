@@ -379,8 +379,8 @@ void autoTetrisServer(void *data)
 
         memset(send_msg, 0, MAX_BUFF);
         copyMap(map, send_buf);
-        sprintf(send_msg, "<tetro>%s</tetro><next>%s</next><map>%s</map>", 
-                tetro->name, next->name, send_buf);
+        sprintf(send_msg, "<inter>%d</inter><tetro>%s</tetro><next>%s</next><map>%s</map>", 
+                interval_coef, tetro->name, next->name, send_buf);
         FD_ZERO(&wfds);   
         FD_SET(client_sockfd, &wfds);  
         time_out.tv_usec = 5;
@@ -437,7 +437,7 @@ void autoTetrisServer(void *data)
             copyDrawMap(map, uid);
 
             if (maptop == maptops[uid])
-                continue;
+                continue;       
             maptop = maptops[uid];
             if (determineCrash(map, tetro, mapleft, maptop))
             {
@@ -448,6 +448,29 @@ void autoTetrisServer(void *data)
                 strcpy(send_msg, "<crash>crash</crash>");
                 sendMsg(client_sockfd, send_msg);
                 break;
+            }
+
+            reMap(map, tetro, mapleft, maptop, score, uid);
+            copyDrawMap(map, uid);
+            memset(send_msg, 0, MAX_BUFF);
+            copyMap(map, send_buf);
+            sprintf(send_msg, "<map>%s</map>", send_buf);
+            FD_ZERO(&wfds);   
+            FD_SET(client_sockfd, &wfds);  
+            time_out.tv_usec = 5;
+            ret = select(client_sockfd+1, NULL, &wfds, NULL, &time_out);
+            if (ret < 0)
+            {
+                //printf("select() failed");
+                perror("select() failed");
+                exit(1);
+            }
+            else
+            {
+                if (FD_ISSET(client_sockfd, &wfds))
+                {
+                    sendMsg(client_sockfd, send_msg);
+                }  
             }
         }
         for (i = 0; i < mapHeight; i++)

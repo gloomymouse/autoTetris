@@ -213,7 +213,7 @@ void autoTetrisClient(void *data)
     //printf("pthread_create() succeed\n");
     //pthread_detach(pthread_self());
     int socket_fd = (int)data;
-    char *name = "G.M.";
+    char *name = "Gaea";
     char send_buf[MAX_BUFF];
     char send_msg[MAX_BUFF];
     char recv_buf[MAX_BUFF];
@@ -252,8 +252,6 @@ void autoTetrisClient(void *data)
         strcat(recv_msg, recv_buf);
         getStatus(recv_msg, map, &tetro_index, &next_index, &crash, &over);
         //drawMap(map, score);
-        tetro = initTetro(tlist, tetro_index);
-        next  = initTetro(nlist, next_index);
         //drawNext(next);
         if (over)
         {
@@ -261,10 +259,20 @@ void autoTetrisClient(void *data)
             getchar();
             break;
         }
-        mapleft = scoreMoveAndRotate(map, maptmp, tetro, next, maptop);
-        memset(send_msg, 0, MAX_BUFF);
-        sprintf(send_msg, "<coor>%d</coor><srs>%d</srs>", mapleft, tetro->srs);
-        sendMsg(socket_fd, send_msg);
+        if (crash == true)
+        {
+            recvMsg(socket_fd, recv_buf);
+            strcat(recv_msg, recv_buf);
+            getStatus(recv_msg, map, &tetro_index, &next_index, &crash, &over);
+            tetro = initTetro(tlist, tetro_index);
+            next  = initTetro(nlist, next_index);
+            crash = false;
+            mapleft = scoreMoveAndRotate(map, maptmp, tetro, next, maptop);
+            memset(send_msg, 0, MAX_BUFF);
+            sprintf(send_msg, "<coor>%d</coor><srs>%d</srs>", mapleft, tetro->srs);
+            sendMsg(socket_fd, send_msg);
+        }
+
         //heaptop = getHeapTop();
         /*
         while (maptop < mapHeight)

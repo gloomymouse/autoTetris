@@ -127,6 +127,10 @@ void getStatus(char *msg, block map[][mapWidth], int *tetro, int *next, bool *cr
         {
             *next = getTetro(value);
         }
+        else if (strcmp(key, "inter") == 0)
+        {
+            //interval_coef = atoi(value);
+        }
         memset(key, 0, MAX_BUFF);
         memset(value, 0, MAX_BUFF);
     }

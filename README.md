@@ -41,7 +41,8 @@ Write your own AI to battle!
 1. Connect to server
 2. Play the game
   - Server information
-    - new tetromino: `<tetro>tx</tetro><next>tx</next><map>map_infomation</map>`
+    - new tetromino: `<inter>interval_time</inter><tetro>tx</tetro><next>tx</next><map>map_infomation</map>`
+      - inter: interval time of each frame
       - tetro & next: x = i, j, l, o, s, t, z
       - map: 200 * 0/2 from top left to bottom right. 
       You may take this as a 10*20 matrix from top of map

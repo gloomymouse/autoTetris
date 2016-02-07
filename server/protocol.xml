@@ -4,6 +4,7 @@
 <map></map> 		<!-- 0/2 -->
 <tetro></tetro>		<!-- ts/tz/tl/tj/ti/to/tt -->
 <next></next>		<!-- ts/tz/tl/tj/ti/to/tt -->
+<inter></inter>     <!-- num -->
 
 <!-- server recv: -->
 <name></name>       <!-- string, no more than 10 chars -->
