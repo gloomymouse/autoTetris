@@ -1,5 +1,5 @@
 /*
- * autoTetris_server (v1.2.1)
+ * autoTetris_server (v1.2.2)
  * Copyright (c) 2016. GloomyMouse (Chaofei XU). All rights reserved.
  *
  */ 
@@ -196,9 +196,10 @@ int main(int argc, char *argv[])
     }
     i = 0;
 
+    usleep(100*1000);
     thread_begin = true;
     struct Tetromino nlist[7] = {ts, tz, tl, tj, ti, to, tt};
-    sleep(1);
+    usleep(1*1000);
     system("clear");
     printf("\033[?25l");
     fflush(stdout);

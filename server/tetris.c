@@ -404,41 +404,49 @@ void autoTetrisServer(void *data)
         //heaptop = getHeapTop();
         while (maptop < mapHeight)
         {
-            FD_ZERO(&rfds);   
-            FD_SET(client_sockfd, &rfds);
-            time_out.tv_usec = 0;
-            ret = select(client_sockfd+1, &rfds, NULL, NULL, &time_out);
-            if (ret < 0)
+            if (down == false)
             {
-                perror("select() failed");
-                exit(1);
-            }
-            else if (ret == 0)
-            {
-            }
-            else    // ret == 0: time out
-            {
-                if (FD_ISSET(client_sockfd, &rfds))
+                FD_ZERO(&rfds);   
+                FD_SET(client_sockfd, &rfds);
+                time_out.tv_usec = 0;
+                ret = select(client_sockfd+1, &rfds, NULL, NULL, &time_out);
+                if (ret < 0)
                 {
-                    recvMsg(client_sockfd, recv_buf);
-                    remap = true;
+                    perror("select() failed");
+                    exit(1);
                 }
-            }
-            if (remap == true)
-            {
-                strcat(recv_msg, recv_buf);
-                action = getAction(recv_msg, tetro, mapleft, down);
-                changeAction(tetro, &mapleft, &down, action);
-                //reMap(map, tetro, mapleft, maptop, score, uid);
-                //copyDrawMap(map, uid);
-                remap = false;
-            }
-            reMap(map, tetro, mapleft, maptop, score, uid);
-            copyDrawMap(map, uid);
+                else if (ret == 0)
+                {
+                }
+                else    // ret == 0: time out
+                {
+                    if (FD_ISSET(client_sockfd, &rfds))
+                    {
+                        recvMsg(client_sockfd, recv_buf);
+                        remap = true;
+                    }
+                }
+                if (remap == true)
+                {
+                    strcat(recv_msg, recv_buf);
+                    action = getAction(recv_msg, tetro, mapleft, down);
+                    changeAction(tetro, &mapleft, &down, action);
+                    //reMap(map, tetro, mapleft, maptop, score, uid);
+                    //copyDrawMap(map, uid);
+                    remap = false;
+                }
+                reMap(map, tetro, mapleft, maptop, score, uid);
+                copyDrawMap(map, uid);
 
-            if (maptop == maptops[uid])
-                continue;       
-            maptop = maptops[uid];
+                if (maptop == maptops[uid])
+                    continue;       
+                maptop = maptops[uid];
+            }
+            else
+            {
+                maptop++;
+            }
+
             if (determineCrash(map, tetro, mapleft, maptop))
             {
                 pthread_mutex_lock(&crash_mutex); 
@@ -452,27 +460,32 @@ void autoTetrisServer(void *data)
 
             reMap(map, tetro, mapleft, maptop, score, uid);
             copyDrawMap(map, uid);
-            memset(send_msg, 0, MAX_BUFF);
-            copyMap(map, send_buf);
-            sprintf(send_msg, "<map>%s</map>", send_buf);
-            FD_ZERO(&wfds);   
-            FD_SET(client_sockfd, &wfds);  
-            time_out.tv_usec = 5;
-            ret = select(client_sockfd+1, NULL, &wfds, NULL, &time_out);
-            if (ret < 0)
+
+            if (down == false)
             {
-                //printf("select() failed");
-                perror("select() failed");
-                exit(1);
-            }
-            else
-            {
-                if (FD_ISSET(client_sockfd, &wfds))
+                memset(send_msg, 0, MAX_BUFF);
+                copyMap(map, send_buf);
+                sprintf(send_msg, "<map>%s</map>", send_buf);
+                FD_ZERO(&wfds);   
+                FD_SET(client_sockfd, &wfds);  
+                time_out.tv_usec = 0;
+                ret = select(client_sockfd+1, NULL, &wfds, NULL, &time_out);
+                if (ret < 0)
                 {
-                    sendMsg(client_sockfd, send_msg);
-                }  
+                    //printf("select() failed");
+                    perror("select() failed");
+                    exit(1);
+                }
+                else
+                {
+                    if (FD_ISSET(client_sockfd, &wfds))
+                    {
+                        sendMsg(client_sockfd, send_msg);
+                    }  
+                }
             }
         }
+        
         for (i = 0; i < mapHeight; i++)
         {
             for (j = 0; j < mapWidth; j++)
