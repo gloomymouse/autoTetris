@@ -2,8 +2,8 @@
 <over></over>		<!-- over -->
 <crash></crash>     <!-- crash -->
 <map></map> 		<!-- 0/2 -->
-<tetro></tetro>		<!-- ts/tz/tl/tj/ti/to/tt -->
-<next></next>		<!-- ts/tz/tl/tj/ti/to/tt -->
+<tetro></tetro>		<!-- s/z/l/j/i/o/t -->
+<next></next>		<!-- s/z/l/j/i/o/t -->
 <inter></inter>     <!-- num -->
 
 <!-- server recv: -->
