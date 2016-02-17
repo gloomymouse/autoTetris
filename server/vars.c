@@ -4,21 +4,26 @@ int thread_num = 0;
 int tetros[MAX_BUFF] = {0};
 int tetros_num[MAX_BUFF] = {0};
 int interval_coef = 100;
+int crash_interval_coef = 20;
 int scores[BACKLOG] = {0};
 int nexts[BACKLOG] = {0};
 int maptops[BACKLOG] = {0};
 bool thread_begin = false;
+bool timer_begin = false;
 bool crashs[BACKLOG] = {false};
 bool overs[BACKLOG] = {false};
 char names[BACKLOG][12];
 pthread_mutex_t print_mutex = PTHREAD_MUTEX_INITIALIZER;
-pthread_mutex_t crash_mutex = PTHREAD_MUTEX_INITIALIZER;
+pthread_mutex_t crash_mutex[BACKLOG];
+//pthread_mutex_t maptop_mutex = PTHREAD_MUTEX_INITIALIZER;
+pthread_mutex_t log_mutex = PTHREAD_MUTEX_INITIALIZER;
+FILE *log_fp = NULL;
 block maps[BACKLOG][mapHeight+1][mapWidth] = {Blank};
 
 Tetromino ts = 
 {
     .id     = 0,
-    .name   = "ts",
+    .name   = 's',
     .left   = {0, 1, 0, 0},
     .right  = {2, 2, 2, 1},
     .top    = {0, 0, 1, 0},
@@ -48,7 +53,7 @@ Tetromino ts =
 Tetromino tz =
 {
     .id     = 1,
-    .name   = "tz",
+    .name   = 'z',
     .left   = {0, 1, 0, 0},
     .right  = {2, 2, 2, 1},
     .top    = {0, 0, 1, 0},
@@ -78,7 +83,7 @@ Tetromino tz =
 Tetromino tl = 
 {
     .id     = 2,
-    .name   = "tl",
+    .name   = 'l',
     .left   = {0, 1, 0, 0},
     .right  = {2, 2, 2, 1},
     .top    = {0, 0, 1, 0},
@@ -108,7 +113,7 @@ Tetromino tl =
 Tetromino tj =
 {
     .id     = 3,
-    .name   = "tj",
+    .name   = 'j',
     .left   = {0, 1, 0, 0},
     .right  = {2, 2, 2, 1},
     .top    = {0, 0, 1, 0},
@@ -138,7 +143,7 @@ Tetromino tj =
 Tetromino ti =
 {
     .id     = 4,
-    .name   = "ti",
+    .name   = 'i',
     .left   = {0, 2, 0, 1},
     .right  = {3, 2, 3, 1},
     .top    = {1, 0, 2, 0},
@@ -168,7 +173,7 @@ Tetromino ti =
 Tetromino to = 
 {
     .id     = 5,
-    .name   = "to",
+    .name   = 'o',
     .left   = {1, 1, 1, 1},
     .right  = {2, 2, 2, 2},
     .top    = {0, 0, 0, 0},
@@ -198,7 +203,7 @@ Tetromino to =
 Tetromino tt = 
 {
     .id     = 6,
-    .name   = "tt",
+    .name   = 't',
     .left   = {0, 1, 0, 0},
     .right  = {2, 2, 2, 1},
     .top    = {0, 0, 1, 0},
