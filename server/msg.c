@@ -127,7 +127,7 @@ void getMap(block map[][mapWidth], char *buf)
 {
     int n = 0;
     int i = 0, j = 0;
-    while (buf[n] != '\0')
+    while (buf[n] != '\0' && i < mapHeight)
     {
         if (buf[n] == '\n')
         {
@@ -146,9 +146,7 @@ void getMap(block map[][mapWidth], char *buf)
         {
             if (log_fp != NULL)
             {
-                pthread_mutex_lock(&log_mutex);
                 fprintf(log_fp, "Error in Test Data <map>: %c\n", buf[n]);
-                pthread_mutex_unlock(&log_mutex);
             }
             printf("Error in Test Data <map>: %c\n", buf[n]);
             map[i][j] = Blank;
@@ -157,6 +155,14 @@ void getMap(block map[][mapWidth], char *buf)
         i = i + j / mapWidth;
         j = j % mapWidth;
         n++;
+    }
+    if (buf[n] != '\0')
+    {
+        if (log_fp != NULL)
+        {
+            fprintf(log_fp, "Error in Test Data <map>: Too Many Squares\n");
+        }
+        printf("Error in Test Data <map>: %c\n", buf[n]);
     }
 }
 
@@ -181,9 +187,7 @@ int getTetro(char buf)
         default:
             if (log_fp != NULL)
             {
-                pthread_mutex_lock(&log_mutex);
                 fprintf(log_fp, "Error in Test Data <tetro>: %c\n", buf);
-                pthread_mutex_unlock(&log_mutex);
             }
             printf("Error in Test Data <tetro>: %c\n", buf);
             return -1;   
@@ -210,9 +214,7 @@ void getTetroList(char *buf)
     {
         if (log_fp != NULL)
         {
-            pthread_mutex_lock(&log_mutex);
             fprintf(log_fp, "Error in Test Data <tetro>: Too Many tetros\n");
-            pthread_mutex_unlock(&log_mutex);
         }
         printf("Error in Test Data <tetro>: Too Many tetros\n");
     }
@@ -242,9 +244,7 @@ void getTestData(FILE *test_fp)
                 {
                     if (log_fp != NULL)
                     {
-                        pthread_mutex_lock(&log_mutex);
                         fprintf(log_fp, "Error in Test Data <tetro>: Duplication\n");
-                        pthread_mutex_unlock(&log_mutex);
                     }
                     printf("Error in Test Data <tetro>: Duplication\n");
                     continue;
@@ -258,9 +258,7 @@ void getTestData(FILE *test_fp)
                 {
                     if (log_fp != NULL)
                     {
-                        pthread_mutex_lock(&log_mutex);
                         fprintf(log_fp, "Error in Test Data <map>: Duplication\n");
-                        pthread_mutex_unlock(&log_mutex);
                     }
                     printf("Error in Test Data <map>: Duplication\n");
                     continue;
