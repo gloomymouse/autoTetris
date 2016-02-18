@@ -27,7 +27,6 @@ void copyMap(block[][mapWidth], char*);
 
 bool gameOver(block[][mapWidth], Tetromino*, int, int);
 
-//void downTimer();
 void downTimer(int);
 
 void autoTetrisServer(void*);

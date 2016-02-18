@@ -162,7 +162,7 @@ void getMap(block map[][mapWidth], char *buf)
         {
             fprintf(log_fp, "Error in Test Data <map>: Too Many Squares\n");
         }
-        printf("Error in Test Data <map>: %c\n", buf[n]);
+        printf("Error in Test Data <map>: Too Many Squares\n");
     }
 }
 
