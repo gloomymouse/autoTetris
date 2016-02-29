@@ -2,7 +2,6 @@
 # Author Frank Hu
 # client
 
-from sys import argv
 import argparse
 import socket
 import re
@@ -63,8 +62,10 @@ def parse_string(server_data, note, verbose, replay):
     0. Parse strings using re.
     1. AI action.
     2. Parse strings to xml format."""
-    mino = re.search(MINO, server_data).group()[8:9]
-    next_mino = re.search(NEXT_MINO, server_data).group()[7:8]
+    mino = re.search(MINO, server_data).group()[7]
+    # xml protocol: <tetro>x</tetro>
+    next_mino = re.search(NEXT_MINO, server_data).group()[6]
+    # <next>x</next>
     map_status = re.search(MAP_STATUS, server_data).group()[5:-6]
 
     if note:

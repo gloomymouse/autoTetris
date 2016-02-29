@@ -169,12 +169,11 @@ def score(status, best_height=MAX_HEIGHT, best_under_blocks=BIG_UNDER_BLOCKS):
         score_status += (height - 10) * 100
 
     # 2. under blocks and cut-off (for speed)
-    # status_T = transpose(status)
     s_underblocks, num_underblocks = score_underblocks(status)
     score_status += s_underblocks
-    if num_underblocks - best_under_blocks > 2:
-        # too many more under blocks, guess it's not a good position
-        return BIG_SCORE, MAX_HEIGHT, BIG_UNDER_BLOCKS
+    #if num_underblocks - best_under_blocks > 2:
+    #    # too many more under blocks, guess it's not a good position
+    #    return BIG_SCORE, MAX_HEIGHT, BIG_UNDER_BLOCKS
 
     # 3. scan profile
     profile = profile_status(status)
@@ -529,14 +528,15 @@ if __name__ == '__main__':
                         help='Random input sequence for Nuwa.',
                         action='store_true')
     parser.add_argument('-f', '--fromfile',
-                        help='Input sequence from file for Nuwa. Input should be single letter sequence.',
+                        help='Input sequence from file for Nuwa.'+
+                             'Input should be single letter sequence.',
                         action='store_true')
     parser.add_argument('-n', '--note',
                         help='Note sequence of minos to "replay.txt".',
                         action='store_true')
     parser.add_argument('-p', '--pause',
-                        help='Pause sequence of minos for every tetromino. \
-                             \Press enter to go on, other key to quit.',
+                        help='Pause sequence of minos for every tetromino.'+
+                             'Press enter to go on, other key to quit.',
                         action='store_true')
     parser.add_argument('-v', '--verbose',
                         help='Show more AI action details.',
